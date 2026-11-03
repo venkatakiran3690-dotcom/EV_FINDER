@@ -1,0 +1,295 @@
+[
+  {
+    "id": "station-1",
+    "name": "Tata Power EZ Charge - Nellore Bypass",
+    "address": "NH16 Nellore Bypass, Nellore, Andhra Pradesh 524004",
+    "lat": 14.4605,
+    "lng": 79.9592,
+    "operator": "Tata Power",
+    "rating": 4.7,
+    "reliability": 92,
+    "gridStatus": "Solar Power Backup",
+    "openingHours": "24/7",
+    "queueLength": 1,
+    "peakHours": [15, 25, 45, 75, 90, 98, 85, 70, 65, 55, 35, 20],
+    "amenities": ["WiFi", "Coffee", "Restrooms", "Shopping"],
+    "connectors": [
+      {
+        "type": "CCS",
+        "power": 150,
+        "price": 17.5,
+        "status": "Available",
+        "count": 6
+      },
+      {
+        "type": "Type 2",
+        "power": 22,
+        "price": 17.5,
+        "status": "Available",
+        "count": 4
+      }
+    ],
+    "status": "Available",
+    "isFavorite": true,
+    "reviews": [
+      {
+        "username": "Aero_Bolt",
+        "rating": 5,
+        "comment": "Super fast charger near the bypass. Very convenient on the highway.",
+        "date": "2026-06-12"
+      }
+    ]
+  },
+  {
+    "id": "station-2",
+    "name": "Jio-bp pulse - Nellore Railway Station",
+    "address": "Station Road, Nellore, Andhra Pradesh 524001",
+    "lat": 14.4468,
+    "lng": 79.9811,
+    "operator": "Jio-bp",
+    "rating": 4.5,
+    "reliability": 94,
+    "gridStatus": "Stable Grid",
+    "openingHours": "24/7",
+    "queueLength": 2,
+    "peakHours": [30, 45, 60, 85, 95, 90, 80, 85, 75, 60, 40, 20],
+    "amenities": ["Dining", "Coffee", "Restrooms"],
+    "connectors": [
+      {
+        "type": "CCS",
+        "power": 120,
+        "price": 19.5,
+        "status": "Available",
+        "count": 4
+      },
+      {
+        "type": "CHAdeMO",
+        "power": 50,
+        "price": 16,
+        "status": "Available",
+        "count": 2
+      }
+    ],
+    "status": "Available",
+    "isFavorite": false,
+    "reviews": [
+      {
+        "username": "Ravi_K",
+        "rating": 5,
+        "comment": "Right outside the railway station. Easy to locate.",
+        "date": "2026-06-15"
+      }
+    ]
+  },
+  {
+    "id": "station-3",
+    "name": "Ather Grid - Dargamitta",
+    "address": "Mini Bypass Road, Dargamitta, Nellore, Andhra Pradesh 524003",
+    "lat": 14.4324,
+    "lng": 79.9721,
+    "operator": "Ather",
+    "rating": 4.8,
+    "reliability": 96,
+    "gridStatus": "Stable Grid",
+    "openingHours": "08:00 - 22:00",
+    "queueLength": 0,
+    "peakHours": [20, 35, 55, 80, 95, 96, 92, 85, 80, 70, 50, 25],
+    "amenities": ["Shopping", "Dining", "Restrooms"],
+    "connectors": [
+      {
+        "type": "Type 2",
+        "power": 22,
+        "price": 15,
+        "status": "Available",
+        "count": 8
+      }
+    ],
+    "status": "Available",
+    "isFavorite": true,
+    "reviews": [
+      {
+        "username": "Nellore_Scooter",
+        "rating": 5,
+        "comment": "Perfect place to charge two-wheelers. Fast charging works well.",
+        "date": "2026-06-20"
+      }
+    ]
+  },
+  {
+    "id": "station-4",
+    "name": "Zeon Charging - VRC Centre",
+    "address": "VRC Centre, Trunk Road, Nellore, Andhra Pradesh 524001",
+    "lat": 14.4452,
+    "lng": 79.9868,
+    "operator": "Zeon Charging",
+    "rating": 4.8,
+    "reliability": 97,
+    "gridStatus": "Stable Grid",
+    "openingHours": "24/7",
+    "queueLength": 0,
+    "peakHours": [10, 15, 30, 50, 75, 80, 70, 65, 85, 90, 60, 30],
+    "amenities": ["Shopping", "WiFi", "Dining"],
+    "connectors": [
+      {
+        "type": "CCS",
+        "power": 240,
+        "price": 22,
+        "status": "Available",
+        "count": 4
+      }
+    ],
+    "status": "Available",
+    "isFavorite": false,
+    "reviews": [
+      {
+        "username": "Travel_Nellore",
+        "rating": 5,
+        "comment": "240 kW charger at the heart of the city. Charged within 15 minutes.",
+        "date": "2026-06-21"
+      }
+    ]
+  },
+  {
+    "id": "station-5",
+    "name": "Statcon Energiaa - Podalakur Road",
+    "address": "Podalakur Road, Nellore, Andhra Pradesh 524004",
+    "lat": 14.4285,
+    "lng": 79.9605,
+    "operator": "Statcon",
+    "rating": 4.1,
+    "reliability": 82,
+    "gridStatus": "Reduced Load - Peak Demand",
+    "openingHours": "09:00 - 21:00",
+    "queueLength": 1,
+    "peakHours": [40, 50, 65, 75, 80, 85, 75, 70, 82, 80, 60, 45],
+    "amenities": ["WiFi", "Dining"],
+    "connectors": [
+      {
+        "type": "CCS",
+        "power": 60,
+        "price": 17,
+        "status": "Available",
+        "count": 2
+      }
+    ],
+    "status": "Available",
+    "isFavorite": false,
+    "reviews": [
+      {
+        "username": "Local_EV",
+        "rating": 3,
+        "comment": "Speeds drop slightly in the evening. Decent otherwise.",
+        "date": "2026-06-11"
+      }
+    ]
+  },
+  {
+    "id": "station-6",
+    "name": "Fortum Charge & Drive - Magunta Layout",
+    "address": "Magunta Layout, Nellore, Andhra Pradesh 524003",
+    "lat": 14.4371,
+    "lng": 79.9798,
+    "operator": "Fortum",
+    "rating": 4.4,
+    "reliability": 90,
+    "gridStatus": "Stable Grid",
+    "openingHours": "06:00 - 23:00",
+    "queueLength": 2,
+    "peakHours": [25, 40, 60, 75, 85, 90, 80, 82, 75, 70, 50, 30],
+    "amenities": ["Shopping", "Restrooms", "Coffee"],
+    "connectors": [
+      {
+        "type": "CCS",
+        "power": 100,
+        "price": 19,
+        "status": "In Use",
+        "count": 3
+      },
+      {
+        "type": "Type 2",
+        "power": 22,
+        "price": 13,
+        "status": "Available",
+        "count": 2
+      }
+    ],
+    "status": "Available",
+    "isFavorite": false,
+    "reviews": [
+      {
+        "username": "Subbu_AP",
+        "rating": 4,
+        "comment": "Nice location. Coffee shop is right across the street.",
+        "date": "2026-06-18"
+      }
+    ]
+  },
+  {
+    "id": "station-7",
+    "name": "Tata Power EZ Charge - Haranathapuram",
+    "address": "Haranathapuram Main Road, Nellore, Andhra Pradesh 524003",
+    "lat": 14.4552,
+    "lng": 79.9754,
+    "operator": "Tata Power",
+    "rating": 4.6,
+    "reliability": 95,
+    "gridStatus": "Solar Power Backup",
+    "openingHours": "24/7",
+    "queueLength": 0,
+    "peakHours": [10, 20, 40, 60, 75, 90, 80, 75, 70, 60, 45, 20],
+    "amenities": ["Park", "Coffee", "Restrooms"],
+    "connectors": [
+      {
+        "type": "CCS",
+        "power": 150,
+        "price": 18.5,
+        "status": "Available",
+        "count": 4
+      }
+    ],
+    "status": "Available",
+    "isFavorite": false,
+    "reviews": [
+      {
+        "username": "Kiran_EV",
+        "rating": 5,
+        "comment": "Excellent solar-backed grid power. Very green setup.",
+        "date": "2026-06-20"
+      }
+    ]
+  },
+  {
+    "id": "station-ap-6",
+    "name": "Statiq Charging Station - Nellore Central",
+    "address": "Grand Trunk Road, Nellore, Andhra Pradesh 524001",
+    "lat": 14.449,
+    "lng": 79.982,
+    "operator": "Statiq",
+    "rating": 4.5,
+    "reliability": 92,
+    "gridStatus": "Stable Grid",
+    "openingHours": "08:00 - 22:00",
+    "queueLength": 0,
+    "peakHours": [10, 25, 45, 60, 80, 90, 85, 75, 65, 55, 35, 10],
+    "amenities": ["Shopping", "Dining", "Restrooms"],
+    "connectors": [
+      {
+        "type": "CCS",
+        "power": 120,
+        "price": 18.5,
+        "status": "Available",
+        "count": 2
+      }
+    ],
+    "status": "Available",
+    "isFavorite": false,
+    "reviews": [
+      {
+        "username": "Nellore_EV",
+        "rating": 5,
+        "comment": "Nice facility, charging got connected instantly.",
+        "date": "2026-06-21"
+      }
+    ]
+  }
+]
