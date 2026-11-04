@@ -1,0 +1,118 @@
+package com.smartev.controller;
+
+import com.smartev.dto.ChargerCreateRequest;
+import com.smartev.dto.ChargerResponse;
+import com.smartev.dto.StationCreateRequest;
+import com.smartev.dto.StationResponse;
+import com.smartev.entity.User;
+import com.smartev.exception.ResourceNotFoundException;
+import com.smartev.repository.UserRepository;
+import com.smartev.security.UserPrincipal;
+import com.smartev.service.StationService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/stations")
+public class StationController {
+
+    private final StationService stationService;
+    private final UserRepository userRepository;
+
+    public StationController(StationService stationService, UserRepository userRepository) {
+        this.stationService = stationService;
+        this.userRepository = userRepository;
+    }
+
+    /**
+     * Search and discover charging stations with filters (AC/DC, connector, power) and Haversine distance sorting.
+     */
+    @GetMapping
+    public ResponseEntity<List<StationResponse>> getStations(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String chargerType,
+            @RequestParam(required = false) String connectorType,
+            @RequestParam(required = false) Double minPower,
+            @RequestParam(required = false) Double driverLat,
+            @RequestParam(required = false) Double driverLon) {
+
+        List<StationResponse> stations = stationService.getAllStations(
+                query, chargerType, connectorType, minPower, driverLat, driverLon);
+        return ResponseEntity.ok(stations);
+    }
+
+    /**
+     * Get station details by ID with dynamic charger status, occupancy %, and estimated wait time.
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<StationResponse> getStationById(
+            @PathVariable Long id,
+            @RequestParam(required = false) Double driverLat,
+            @RequestParam(required = false) Double driverLon) {
+
+        StationResponse station = stationService.getStationById(id, driverLat, driverLon);
+        return ResponseEntity.ok(station);
+    }
+
+    /**
+     * Get chargers for a specific station.
+     */
+    @GetMapping("/{id}/chargers")
+    public ResponseEntity<List<ChargerResponse>> getChargers(@PathVariable Long id) {
+        return ResponseEntity.ok(stationService.getChargersByStation(id));
+    }
+
+    /**
+     * Create a new charging station (Company Admin or Platform Admin).
+     */
+    @PostMapping
+    @PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'PLATFORM_ADMIN')")
+    public ResponseEntity<StationResponse> createStation(
+            @Valid @RequestBody StationCreateRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        User currentUser = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return ResponseEntity.ok(stationService.createStation(request, currentUser));
+    }
+
+    /**
+     * Register a new charger to a station.
+     */
+    @PostMapping("/{id}/chargers")
+    @PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'STATION_MANAGER', 'PLATFORM_ADMIN')")
+    public ResponseEntity<ChargerResponse> addCharger(
+            @PathVariable Long id,
+            @Valid @RequestBody ChargerCreateRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        User currentUser = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return ResponseEntity.ok(stationService.addChargerToStation(id, request, currentUser));
+    }
+
+    /**
+     * Update operational status of a charger (e.g. OPERATIONAL vs OUT_OF_SERVICE).
+     */
+    @PatchMapping("/chargers/{id}/status")
+    @PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'STATION_MANAGER', 'PLATFORM_ADMIN')")
+    public ResponseEntity<ChargerResponse> updateChargerStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> statusUpdate,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        User currentUser = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        String operationalStatus = statusUpdate.get("operationalStatus");
+        String availabilityStatus = statusUpdate.get("availabilityStatus");
+
+        return ResponseEntity.ok(stationService.updateChargerStatus(id, operationalStatus, availabilityStatus, currentUser));
+    }
+}

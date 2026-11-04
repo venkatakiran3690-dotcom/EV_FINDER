@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Master Admin - Smart EV System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <i class="bi bi-ev-station-fill text-success fs-3 me-2"></i>
+                <span>Smart EV Infrastructure</span>
+                <span class="badge bg-danger ms-2">Platform Master Admin</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="navbar-text text-light small" id="adminTitle">Platform Admin</span>
+                <button class="btn btn-outline-danger btn-sm" onclick="auth.logout()"><i class="bi bi-box-arrow-right"></i> Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 py-4 main-content">
+        <!-- Banner -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h3 class="fw-bold mb-1">Central Platform Administration & Multi-Tenant Oversight</h3>
+                    <p class="text-muted small mb-0">System-wide monitoring, charging point operators (CPO) management, and audit logs</p>
+                </div>
+                <div class="d-flex gap-2 mt-3 mt-md-0">
+                    <button class="btn btn-primary" onclick="openAddCompanyModal()"><i class="bi bi-building-add me-1"></i> Register Company (CPO)</button>
+                    <button class="btn btn-outline-primary" onclick="openAddUserModal()"><i class="bi bi-person-gear me-1"></i> Create Privileged User</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="alert-container"></div>
+
+        <!-- Metric Stat Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card stat-card p-3">
+                    <span class="small text-muted">Registered Drivers</span>
+                    <h3 class="fw-bold mb-0 text-primary" id="pStatDrivers">0</h3>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card stat-card p-3">
+                    <span class="small text-muted">Charging Companies</span>
+                    <h3 class="fw-bold mb-0 text-success" id="pStatCompanies">0</h3>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card stat-card p-3">
+                    <span class="small text-muted">Total Stations</span>
+                    <h3 class="fw-bold mb-0 text-dark" id="pStatStations">0</h3>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card stat-card p-3">
+                    <span class="small text-muted">Total Chargers</span>
+                    <h3 class="fw-bold mb-0 text-info" id="pStatChargers">0</h3>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card stat-card p-3">
+                    <span class="small text-muted">Total Bookings</span>
+                    <h3 class="fw-bold mb-0 text-warning" id="pStatBookings">0</h3>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card stat-card p-3">
+                    <span class="small text-muted">Platform Revenue</span>
+                    <h3 class="fw-bold mb-0 text-success" id="pStatRevenue">₹0.00</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Companies and Users Tabs -->
+        <div class="row g-4 mb-4">
+            <!-- Left: Registered Charging Companies (CPOs) -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-buildings text-primary me-2"></i> Onboarded Charging Point Operators (CPOs)</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>CPO Name</th>
+                                    <th>Registration No.</th>
+                                    <th>Contact Email</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="companiesTableBody">
+                                <tr><td colspan="5" class="text-center py-3 text-muted">Loading companies...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Registered Platform Users -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-people text-success me-2"></i> User Directory</h5>
+                        <select id="userRoleFilter" class="form-select form-select-sm" style="width: 140px;" onchange="loadUsers()">
+                            <option value="">All Roles</option>
+                            <option value="DRIVER">Drivers</option>
+                            <option value="COMPANY_ADMIN">Company Admins</option>
+                            <option value="STATION_MANAGER">Station Managers</option>
+                            <option value="PLATFORM_ADMIN">Platform Admins</option>
+                        </select>
+                    </div>
+                    <div id="usersContainer" style="max-height: 380px; overflow-y: auto;">
+                        <div class="text-center py-3 text-muted small">Loading user directory...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Activity Logs -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <h5 class="fw-bold mb-3"><i class="bi bi-journal-text text-secondary me-2"></i> System Activity & Security Audit Logs</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle small mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User Email</th>
+                            <th>Role</th>
+                            <th>Action Triggered</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityLogsBody">
+                        <tr>
+                            <td>${new Date().toISOString()}</td>
+                            <td>system@smartev.com</td>
+                            <td><span class="badge bg-secondary">SYSTEM</span></td>
+                            <td>Application Startup & Data Seeding Complete</td>
+                            <td>Verified 3 CPOs, 5 stations, 17 chargers, and regulated tariffs.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Company Modal -->
+    <div class="modal fade" id="addCompModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Register Charging Point Operator (CPO)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCompForm">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Company Name</label>
+                            <input type="text" id="cpName" class="form-control form-control-sm" placeholder="e.g. Ather Grid" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Registration Number</label>
+                            <input type="text" id="cpReg" class="form-control form-control-sm" placeholder="e.g. CPO-IND-2026-88" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Contact Email</label>
+                                <input type="email" id="cpEmail" class="form-control form-control-sm" placeholder="care@company.com" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Phone</label>
+                                <input type="tel" id="cpPhone" class="form-control form-control-sm" placeholder="+91 98765 00000">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Registered Office Address</label>
+                            <input type="text" id="cpAddress" class="form-control form-control-sm" placeholder="Bangalore, Karnataka">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Register CPO Account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Create Privileged Administrative User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserForm">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Full Name</label>
+                            <input type="text" id="uName" class="form-control form-control-sm" placeholder="e.g. Ramesh Verma" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Email Address</label>
+                                <input type="email" id="uEmail" class="form-control form-control-sm" placeholder="admin@cpo.com" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Password</label>
+                                <input type="password" id="uPass" class="form-control form-control-sm" placeholder="••••••••" required>
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Role</label>
+                                <select id="uRole" class="form-select form-select-sm" required>
+                                    <option value="COMPANY_ADMIN" selected>Company Admin</option>
+                                    <option value="STATION_MANAGER">Station Manager</option>
+                                    <option value="PLATFORM_ADMIN">Platform Admin</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Assign Company ID</label>
+                                <input type="number" id="uCompId" class="form-control form-control-sm" placeholder="e.g. 1">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-sm w-100">Create Account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        auth.checkRoleGuard(['PLATFORM_ADMIN']);
+
+        async function initPlatformAdmin() {
+            try {
+                // 1. Stats
+                const stats = await apiFetch('/dashboard/admin');
+                document.getElementById('pStatDrivers').innerText = stats.totalDrivers;
+                document.getElementById('pStatCompanies').innerText = stats.totalCompanies;
+                document.getElementById('pStatStations').innerText = stats.totalStations;
+                document.getElementById('pStatChargers').innerText = stats.totalChargers;
+                document.getElementById('pStatBookings').innerText = stats.totalBookings;
+                document.getElementById('pStatRevenue').innerText = formatCurrency(stats.totalRevenue);
+
+                // 2. Load Companies
+                loadCompanies();
+
+                // 3. Load Users
+                loadUsers();
+
+            } catch (err) {
+                showAlert('Failed to load platform data: ' + err.message, 'danger');
+            }
+        }
+
+        async function loadCompanies() {
+            const tbody = document.getElementById('companiesTableBody');
+            try {
+                const companies = await apiFetch('/admin/companies');
+                if (companies.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-muted">No CPOs onboarded</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = companies.map(c => `
+                    <tr>
+                        <td><strong>${c.name}</strong></td>
+                        <td><code>${c.registrationNumber || '-'}</code></td>
+                        <td>${c.contactEmail || '-'}</td>
+                        <td>
+                            <span class="badge ${c.status === 'ACTIVE' ? 'bg-success' : 'bg-danger'}">${c.status}</span>
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-sm ${c.status === 'ACTIVE' ? 'btn-outline-danger' : 'btn-outline-success'} py-0 px-2"
+                                    onclick="toggleCompanyStatus(${c.id}, '${c.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE'}')">
+                                ${c.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-danger py-2 text-center">${err.message}</td></tr>`;
+            }
+        }
+
+        async function toggleCompanyStatus(id, newStatus) {
+            try {
+                await apiFetch(`/admin/companies/${id}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status: newStatus })
+                });
+                showAlert('Company status updated.', 'success');
+                loadCompanies();
+            } catch (err) {
+                showAlert(err.message, 'danger');
+            }
+        }
+
+        async function loadUsers() {
+            const role = document.getElementById('userRoleFilter').value;
+            const container = document.getElementById('usersContainer');
+            try {
+                const endpoint = role ? `/admin/users?role=${role}` : '/admin/users';
+                const users = await apiFetch(endpoint);
+
+                if (users.length === 0) {
+                    container.innerHTML = `<div class="text-center py-3 text-muted small">No users found for selected role</div>`;
+                    return;
+                }
+
+                container.innerHTML = users.map(u => `
+                    <div class="border-bottom py-2 small d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${u.fullName}</strong>
+                            <div class="text-muted" style="font-size: 0.75rem;">${u.email}</div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-secondary mb-1" style="font-size: 0.65rem;">${u.role}</span>
+                            <div class="text-success small" style="font-size: 0.7rem;">● ${u.status}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = `<div class="text-danger small">Error loading users</div>`;
+            }
+        }
+
+        function openAddCompanyModal() {
+            new bootstrap.Modal(document.getElementById('addCompModal')).show();
+        }
+
+        document.getElementById('addCompForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('cpName').value.trim(),
+                registrationNumber: document.getElementById('cpReg').value.trim(),
+                contactEmail: document.getElementById('cpEmail').value.trim(),
+                contactPhone: document.getElementById('cpPhone').value.trim(),
+                address: document.getElementById('cpAddress').value.trim()
+            };
+            try {
+                await apiFetch('/admin/companies', {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                bootstrap.Modal.getInstance(document.getElementById('addCompModal')).hide();
+                showAlert('Company registered successfully!', 'success');
+                loadCompanies();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        function openAddUserModal() {
+            new bootstrap.Modal(document.getElementById('addUserModal')).show();
+        }
+
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                fullName: document.getElementById('uName').value.trim(),
+                email: document.getElementById('uEmail').value.trim(),
+                password: document.getElementById('uPass').value,
+                role: document.getElementById('uRole').value,
+                companyId: document.getElementById('uCompId').value.trim() || null
+            };
+            try {
+                await apiFetch('/admin/users', {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+                showAlert('Administrative user account created!', 'success');
+                loadUsers();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', initPlatformAdmin);
+    </script>
+</body>
+</html>

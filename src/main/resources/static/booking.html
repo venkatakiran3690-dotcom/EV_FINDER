@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Book Charging Slot - Smart EV System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <i class="bi bi-ev-station-fill text-success fs-3 me-2"></i>
+                <span>Smart EV Infrastructure</span>
+            </a>
+            <div class="d-flex gap-2">
+                <a href="/station-search.html" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left"></i> Station Map</a>
+                <a href="/driver-dashboard.html" class="btn btn-outline-info btn-sm"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-primary mb-1">Slot Pre-Booking</span>
+                            <h3 class="fw-bold mb-1" id="stationName">Loading Station Details...</h3>
+                            <p class="text-muted small mb-0" id="stationAddress">-</p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-secondary" id="companyBadge">-</span>
+                        </div>
+                    </div>
+
+                    <div id="alert-container"></div>
+
+                    <!-- Geofence Audit Card -->
+                    <div class="card bg-white border border-info rounded-3 p-3 mb-4">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <div>
+                                <h6 class="fw-bold text-primary mb-1"><i class="bi bi-shield-check"></i> Server-Side 30 km Geofence Verification</h6>
+                                <div class="small text-muted" id="geoCoordinates">Validating client location against station coordinates...</div>
+                            </div>
+                            <div id="geofenceResultBadge" class="mt-2 mt-md-0">
+                                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Calculating Distance...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="bookingForm">
+                        <div class="row g-3 mb-3">
+                            <!-- Select Charger -->
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Select Charger Post</label>
+                                <select id="chargerSelect" class="form-select" required>
+                                    <option value="">Loading chargers...</option>
+                                </select>
+                                <div class="form-text small" id="chargerDetails">-</div>
+                            </div>
+
+                            <!-- Select Vehicle -->
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Select Your Vehicle</label>
+                                <select id="vehicleSelect" class="form-select">
+                                    <option value="">Select registered vehicle...</option>
+                                </select>
+                                <div class="form-text small"><a href="/driver-dashboard.html">+ Add new vehicle in dashboard</a></div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <!-- Start Date and Time -->
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Booking Start Time</label>
+                                <input type="datetime-local" id="startTime" class="form-control" required>
+                                <div class="form-text small">Must be a present or future time slot.</div>
+                            </div>
+
+                            <!-- Duration -->
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Duration (Minutes)</label>
+                                <select id="durationMinutes" class="form-select" required>
+                                    <option value="30">30 Minutes</option>
+                                    <option value="45" selected>45 Minutes (Recommended)</option>
+                                    <option value="60">60 Minutes</option>
+                                    <option value="90">90 Minutes</option>
+                                    <option value="120">120 Minutes (2 Hours)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Demo Token Payment Summary -->
+                        <div class="card bg-light border-0 p-3 rounded-3 mb-4">
+                            <h6 class="fw-bold mb-2"><i class="bi bi-wallet2 text-success"></i> Demo Token Reservation Payment</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small text-muted">Mandatory reservation deposit to prevent no-shows (Simulated):</span>
+                                <strong class="fs-5 text-dark">₹150.00</strong>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="simulateFailure">
+                                <label class="form-check-label small text-danger" for="simulateFailure">
+                                    <strong>Simulate Payment Gateway Failure</strong> (Demonstration feature to test rejected payments)
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btnSubmit" class="btn btn-success btn-lg w-100 py-3 fw-bold">
+                            <i class="bi bi-check2-circle me-1"></i> Confirm Pre-Booking & Pay Demo Token
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        // Ensure user is logged in as DRIVER
+        if (!auth.checkRoleGuard(['DRIVER', 'PLATFORM_ADMIN'])) {
+            // redirected
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const stationId = urlParams.get('stationId');
+        let driverLat = parseFloat(urlParams.get('lat') || 12.9716);
+        let driverLon = parseFloat(urlParams.get('lon') || 77.5946);
+
+        let stationData = null;
+
+        // Set default start time to 30 mins from now
+        function setDefaultTime() {
+            const now = new Date(Date.now() + 30 * 60000);
+            now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15, 0, 0);
+            const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById('startTime').value = iso;
+        }
+
+        async function loadData() {
+            setDefaultTime();
+
+            if (!stationId) {
+                showAlert('No station selected. Redirecting to station finder...', 'danger');
+                setTimeout(() => window.location.href = '/station-search.html', 1500);
+                return;
+            }
+
+            try {
+                // 1. Fetch Station Details
+                stationData = await apiFetch(`/stations/${stationId}?driverLat=${driverLat}&driverLon=${driverLon}`);
+                document.getElementById('stationName').innerText = stationData.name;
+                document.getElementById('stationAddress').innerText = `${stationData.address}, ${stationData.city}, ${stationData.state}`;
+                document.getElementById('companyBadge').innerText = stationData.companyName;
+
+                // Geofence Banner Update
+                const dist = stationData.distanceKm;
+                const isWithin = dist !== null && dist <= 30.0;
+                document.getElementById('geoCoordinates').innerHTML = `
+                    Driver GPS: <code>(${driverLat.toFixed(4)}, ${driverLon.toFixed(4)})</code> &rarr;
+                    Station: <code>(${stationData.latitude.toFixed(4)}, ${stationData.longitude.toFixed(4)})</code><br>
+                    Calculated Great-Circle Distance: <strong>${dist !== null ? dist.toFixed(2) + ' km' : 'Unknown'}</strong>
+                `;
+
+                const badgeEl = document.getElementById('geofenceResultBadge');
+                if (isWithin) {
+                    badgeEl.innerHTML = `<span class="badge bg-success p-2 fs-6"><i class="bi bi-check-circle"></i> Passed (${dist.toFixed(1)} km &le; 30 km)</span>`;
+                } else {
+                    badgeEl.innerHTML = `<span class="badge bg-danger p-2 fs-6"><i class="bi bi-x-circle"></i> Violates Geofence (${dist ? dist.toFixed(1) : '>30'} km > 30 km)</span>`;
+                    document.getElementById('btnSubmit').disabled = true;
+                    showAlert('This station exceeds the 30 km geofence limit. Bookings are rejected by the server.', 'danger');
+                }
+
+                // 2. Populate Chargers
+                const chargerSelect = document.getElementById('chargerSelect');
+                chargerSelect.innerHTML = '<option value="">Select a charger...</option>';
+
+                const chargers = stationData.chargers || [];
+                chargers.forEach(chg => {
+                    const isOut = chg.operationalStatus === 'OUT_OF_SERVICE';
+                    const opt = document.createElement('option');
+                    opt.value = chg.id;
+                    opt.disabled = isOut;
+                    opt.innerText = `${chg.chargerIdentifier} - ${chg.chargerType} (${chg.connectorType}, ${chg.powerRatingKw} kW) ${isOut ? '[OUT OF SERVICE]' : ''}`;
+                    chargerSelect.appendChild(opt);
+                });
+
+                chargerSelect.addEventListener('change', () => {
+                    const selected = chargers.find(c => c.id == chargerSelect.value);
+                    if (selected) {
+                        document.getElementById('chargerDetails').innerText =
+                            `Status: ${selected.availabilityStatus} | Power: ${selected.powerRatingKw} kW | Connector: ${selected.connectorType}`;
+                    } else {
+                        document.getElementById('chargerDetails').innerText = '-';
+                    }
+                });
+
+                // 3. Populate Driver Vehicles
+                try {
+                    const vehicles = await apiFetch('/vehicles');
+                    const vSelect = document.getElementById('vehicleSelect');
+                    vehicles.forEach(v => {
+                        const opt = document.createElement('option');
+                        opt.value = v.id;
+                        opt.innerText = `${v.make} ${v.model} (${v.licensePlate}) - ${v.batteryCapacityKwh} kWh [${v.compatibleConnector}]`;
+                        vSelect.appendChild(opt);
+                    });
+                } catch (ignored) {}
+
+            } catch (err) {
+                showAlert('Failed to load station: ' + err.message, 'danger');
+            }
+        }
+
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Verifying slot & geofence...`;
+
+            const startTimeRaw = document.getElementById('startTime').value;
+            // Append seconds for ISO format
+            const startTimeIso = startTimeRaw.length === 16 ? startTimeRaw + ':00' : startTimeRaw;
+
+            const bookingPayload = {
+                stationId: parseInt(stationId),
+                chargerId: parseInt(document.getElementById('chargerSelect').value),
+                vehicleId: document.getElementById('vehicleSelect').value ? parseInt(document.getElementById('vehicleSelect').value) : null,
+                startTime: startTimeIso,
+                durationMinutes: parseInt(document.getElementById('durationMinutes').value),
+                driverLatitude: driverLat,
+                driverLongitude: driverLon
+            };
+
+            try {
+                // Step 1: Create Pre-Booking
+                const booking = await apiFetch('/bookings', {
+                    method: 'POST',
+                    body: JSON.stringify(bookingPayload)
+                });
+
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Settling Demo Token Payment...`;
+
+                // Step 2: Process Demo Token Payment
+                const simulateFailure = document.getElementById('simulateFailure').checked;
+                const payment = await apiFetch('/payments/demo', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        bookingId: booking.id,
+                        simulateFailure: simulateFailure,
+                        paymentMethodNote: 'Demo FastPay Token Wallet'
+                    })
+                });
+
+                if (payment.status === 'SUCCESS') {
+                    showAlert(`Booking confirmed successfully! Booking Code: ${booking.bookingCode}`, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/bookings.html';
+                    }, 1200);
+                } else {
+                    showAlert(`Payment Failed: ${payment.paymentMethodNote}. You can retry payment in My Bookings.`, 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/bookings.html';
+                    }, 2000);
+                }
+
+            } catch (err) {
+                showAlert(err.message || 'Failed to complete booking reservation.', 'danger');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="bi bi-check2-circle me-1"></i> Confirm Pre-Booking & Pay Demo Token`;
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>

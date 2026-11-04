@@ -1,0 +1,154 @@
+/* Smart EV Station Finder & Billing System - Custom Modern Styles */
+:root {
+    --ev-primary: #0d6efd;
+    --ev-success: #198754;
+    --ev-accent: #00d284;
+    --ev-dark: #1e293b;
+    --ev-card-bg: #ffffff;
+    --ev-border: #e2e8f0;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #f8fafc;
+    color: #1e293b;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+}
+
+/* Navbar */
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.navbar-brand .brand-badge {
+    background: linear-gradient(135deg, #00d284, #0d6efd);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+/* Stat Cards */
+.stat-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* Map Container */
+#map {
+    height: 520px;
+    width: 100%;
+    border-radius: 12px;
+    z-index: 1;
+}
+
+/* Battery Indicator Animation */
+.battery-container {
+    width: 180px;
+    height: 320px;
+    border: 8px solid #334155;
+    border-radius: 24px;
+    position: relative;
+    padding: 6px;
+    background: #0f172a;
+    margin: 0 auto;
+}
+
+.battery-container::before {
+    content: '';
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 12px;
+    background: #334155;
+    border-radius: 6px 6px 0 0;
+}
+
+.battery-fill {
+    width: 100%;
+    background: linear-gradient(180deg, #00d284, #10b981);
+    border-radius: 14px;
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    right: 6px;
+    transition: height 1s ease-in-out;
+    box-shadow: 0 0 20px rgba(0, 210, 132, 0.5);
+}
+
+.battery-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 800;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    z-index: 2;
+}
+
+/* Pulse animation */
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 10px rgba(0, 210, 132, 0.4); }
+    50% { box-shadow: 0 0 25px rgba(0, 210, 132, 0.8); }
+    100% { box-shadow: 0 0 10px rgba(0, 210, 132, 0.4); }
+}
+
+.charging-active {
+    animation: pulseGlow 2s infinite ease-in-out;
+}
+
+/* Badges */
+.badge-available { background-color: #d1fae5; color: #065f46; font-weight: 600; }
+.badge-occupied { background-color: #fee2e2; color: #991b1b; font-weight: 600; }
+.badge-reserved { background-color: #fef3c7; color: #92400e; font-weight: 600; }
+.badge-out-of-service { background-color: #e2e8f0; color: #475569; font-weight: 600; }
+
+/* Demo Banner */
+.demo-badge {
+    background-color: #e0e7ff;
+    color: #3730a3;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+/* Footer */
+footer {
+    background: #0f172a;
+    color: #94a3b8;
+    padding: 24px 0;
+    font-size: 0.875rem;
+    margin-top: auto;
+}

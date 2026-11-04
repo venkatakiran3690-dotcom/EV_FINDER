@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing & Invoices - Smart EV System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <i class="bi bi-ev-station-fill text-success fs-3 me-2"></i>
+                <span>Smart EV Infrastructure</span>
+            </a>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/driver-dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/station-search.html"><i class="bi bi-geo-alt"></i> Find Stations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/bookings.html"><i class="bi bi-calendar-check"></i> My Bookings</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/billing.html"><i class="bi bi-receipt"></i> Invoices</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="navbar-text text-light small" id="navUser">Driver</span>
+                    <button class="btn btn-outline-danger btn-sm" onclick="auth.logout()"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4 main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+            <div>
+                <h3 class="fw-bold mb-1">Billing & Tax Invoices</h3>
+                <p class="text-muted small mb-0">Transparent breakdown of energy delivered, CPO tariffs, service fees, and downloadable official PDF invoices</p>
+            </div>
+        </div>
+
+        <div id="alert-container"></div>
+
+        <!-- Invoices Table Card -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr class="small text-muted">
+                            <th>Invoice No.</th>
+                            <th>Date & Time</th>
+                            <th>Charging Station</th>
+                            <th>Energy (kWh)</th>
+                            <th>Base Rate</th>
+                            <th>Service Fee</th>
+                            <th>GST (18%)</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th class="text-end">Download Invoice</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billsTableBody">
+                        <tr>
+                            <td colspan="10" class="text-center py-4 text-muted">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div> Loading billing history...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        auth.checkRoleGuard(['DRIVER', 'COMPANY_ADMIN', 'PLATFORM_ADMIN', 'STATION_MANAGER']);
+
+        async function loadBills() {
+            try {
+                const bills = await apiFetch('/bills');
+                const tbody = document.getElementById('billsTableBody');
+
+                if (bills.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="10" class="text-center py-5 text-muted">
+                                <i class="bi bi-receipt-cutoff fs-1 text-secondary mb-2 d-block"></i>
+                                <h6>No invoices found</h6>
+                                <p class="small">Invoices are automatically generated upon completion of charging sessions.</p>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = bills.map(b => `
+                    <tr>
+                        <td><strong class="text-primary">${b.invoiceNumber}</strong></td>
+                        <td class="small">${formatDateTime(b.createdAt)}</td>
+                        <td>
+                            <div class="fw-bold">${b.stationName}</div>
+                            <div class="small text-muted">${b.companyName} | ${b.chargerIdentifier}</div>
+                        </td>
+                        <td><strong>${b.energyConsumedKwh.toFixed(2)} kWh</strong></td>
+                        <td class="small">₹${b.pricePerKwh}/kWh</td>
+                        <td class="small">₹${b.serviceCharge}</td>
+                        <td class="small">₹${b.taxAmount}</td>
+                        <td class="fs-6 fw-bold text-dark">₹${b.totalAmount}</td>
+                        <td><span class="badge bg-success">${b.paymentStatus}</span></td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-primary btn-sm" onclick="downloadPdf(${b.id}, '${b.invoiceNumber}')">
+                                <i class="bi bi-file-earmark-pdf"></i> Download PDF
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+            } catch (err) {
+                showAlert('Failed to load bills: ' + err.message, 'danger');
+            }
+        }
+
+        async function downloadPdf(billId, invoiceNumber) {
+            try {
+                showAlert('Generating authenticated server-side PDF invoice...', 'info');
+                const blob = await apiFetch(`/bills/${billId}/invoice`);
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `${invoiceNumber}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                showAlert('Invoice downloaded successfully!', 'success');
+            } catch (err) {
+                showAlert('Failed to download PDF invoice: ' + err.message, 'danger');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = auth.getUser();
+            if (user) document.getElementById('navUser').innerText = user.fullName;
+            loadBills();
+        });
+    </script>
+</body>
+</html>
