@@ -12,6 +12,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @Service
 public class DashboardService {
@@ -26,6 +27,7 @@ public class DashboardService {
     private final ComplaintRepository complaintRepository;
     private final MaintenanceRecordRepository maintenanceRepository;
     private final NotificationRepository notificationRepository;
+    private final StationManagerAssignmentRepository assignmentRepository;
 
     public DashboardService(UserRepository userRepository,
                             CompanyRepository companyRepository,
@@ -37,6 +39,23 @@ public class DashboardService {
                             ComplaintRepository complaintRepository,
                             MaintenanceRecordRepository maintenanceRepository,
                             NotificationRepository notificationRepository) {
+        this(userRepository, companyRepository, stationRepository, chargerRepository,
+             bookingRepository, sessionRepository, billRepository, complaintRepository,
+             maintenanceRepository, notificationRepository, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public DashboardService(UserRepository userRepository,
+                            CompanyRepository companyRepository,
+                            StationRepository stationRepository,
+                            ChargerRepository chargerRepository,
+                            BookingRepository bookingRepository,
+                            ChargingSessionRepository sessionRepository,
+                            BillRepository billRepository,
+                            ComplaintRepository complaintRepository,
+                            MaintenanceRecordRepository maintenanceRepository,
+                            NotificationRepository notificationRepository,
+                            StationManagerAssignmentRepository assignmentRepository) {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.stationRepository = stationRepository;
@@ -47,6 +66,7 @@ public class DashboardService {
         this.complaintRepository = complaintRepository;
         this.maintenanceRepository = maintenanceRepository;
         this.notificationRepository = notificationRepository;
+        this.assignmentRepository = assignmentRepository;
     }
 
     @Transactional(readOnly = true)
@@ -129,6 +149,48 @@ public class DashboardService {
 
         stats.setUnreadNotifications(notificationRepository.countByUserIdAndIsReadFalse(driver.getId()));
 
+        return stats;
+    }
+
+    @Transactional(readOnly = true)
+    public DashboardStatsResponse getStationManagerDashboard(User manager) {
+        DashboardStatsResponse stats = new DashboardStatsResponse();
+        stats.setRole(Role.STATION_MANAGER.name());
+
+        List<Long> assignedStationIds = assignmentRepository != null
+                ? assignmentRepository.findByUserId(manager.getId()).stream().map(a -> a.getStation().getId()).toList()
+                : List.of();
+
+        if (assignedStationIds.isEmpty()) {
+            stats.setTotalStations(0L);
+            stats.setTotalChargers(0L);
+            stats.setAvailableChargers(0L);
+            stats.setOccupiedChargers(0L);
+            stats.setOutOfServiceChargers(0L);
+            stats.setTotalBookings(0L);
+            stats.setActiveSessions(0L);
+            stats.setCompletedSessions(0L);
+            stats.setPendingMaintenance(0L);
+            stats.setTotalRevenue(BigDecimal.ZERO);
+            return stats;
+        }
+
+        stats.setTotalStations((long) assignedStationIds.size());
+        stats.setTotalChargers(chargerRepository.countByStationIdIn(assignedStationIds));
+        stats.setAvailableChargers(chargerRepository.countByStationIdInAndAvailabilityStatus(assignedStationIds, "AVAILABLE"));
+        stats.setOccupiedChargers(chargerRepository.countByStationIdInAndAvailabilityStatus(assignedStationIds, "OCCUPIED"));
+        stats.setOutOfServiceChargers(chargerRepository.countByStationIdInAndOperationalStatus(assignedStationIds, "OUT_OF_SERVICE"));
+
+        stats.setTotalBookings(bookingRepository.countByStationIdIn(assignedStationIds));
+
+        stats.setActiveSessions(sessionRepository.countByStationIdInAndStatus(assignedStationIds, "ACTIVE"));
+        stats.setCompletedSessions(sessionRepository.countByStationIdInAndStatus(assignedStationIds, "COMPLETED"));
+
+        long pendingMaint = maintenanceRepository.countByStationIdInAndStatus(assignedStationIds, "PENDING")
+                + maintenanceRepository.countByStationIdInAndStatus(assignedStationIds, "IN_PROGRESS");
+        stats.setPendingMaintenance(pendingMaint);
+
+        stats.setTotalRevenue(BigDecimal.ZERO); // Revenue is protected from station managers
         return stats;
     }
 }

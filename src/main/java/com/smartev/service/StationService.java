@@ -315,7 +315,40 @@ public class StationService {
             if (user.getCompany() == null || !user.getCompany().getId().equals(station.getCompany().getId())) {
                 throw new UnauthorizedException("Unauthorized: Station belongs to a different charging company.");
             }
+        } else if (user.getRole() == Role.STATION_MANAGER) {
+            if (user.getCompany() == null || !user.getCompany().getId().equals(station.getCompany().getId())) {
+                throw new UnauthorizedException("Unauthorized: Station belongs to a different charging company.");
+            }
+            boolean isAssigned = assignmentRepository != null && assignmentRepository.existsByUserIdAndStationId(user.getId(), station.getId());
+            if (!isAssigned) {
+                throw new UnauthorizedException("Unauthorized: Station is not assigned to this station manager.");
+            }
+        } else {
+            throw new UnauthorizedException("Unauthorized: You do not have permission to manage this station.");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<StationResponse> getAssignedStationsForManager(User manager) {
+        if (manager.getRole() == Role.PLATFORM_ADMIN) {
+            return stationRepository.findAll().stream()
+                    .map(s -> buildStationResponse(s, null, null))
+                    .collect(Collectors.toList());
+        }
+        if (manager.getRole() == Role.COMPANY_ADMIN) {
+            if (manager.getCompany() == null) return List.of();
+            return stationRepository.findByCompanyId(manager.getCompany().getId()).stream()
+                    .map(s -> buildStationResponse(s, null, null))
+                    .collect(Collectors.toList());
+        }
+        if (manager.getRole() == Role.STATION_MANAGER) {
+            if (assignmentRepository == null) return List.of();
+            List<StationManagerAssignment> assignments = assignmentRepository.findByUserId(manager.getId());
+            return assignments.stream()
+                    .map(a -> buildStationResponse(a.getStation(), null, null))
+                    .collect(Collectors.toList());
+        }
+        throw new UnauthorizedException("Unauthorized: Not a station manager or administrator.");
     }
 
     @Transactional

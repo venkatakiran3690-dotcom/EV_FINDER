@@ -58,9 +58,14 @@ public class PdfInvoiceService {
             subtitle.setAlignment(Element.ALIGN_CENTER);
             document.add(subtitle);
 
-            Paragraph title = new Paragraph("TAX INVOICE / CHARGING RECEIPT", titleFont);
+            Paragraph demoBanner = new Paragraph("DEMO / SIMULATED INVOICE -- FOR DEMONSTRATION PURPOSES ONLY", boldFont);
+            demoBanner.setAlignment(Element.ALIGN_CENTER);
+            demoBanner.setSpacingBefore(8);
+            document.add(demoBanner);
+
+            Paragraph title = new Paragraph("DEMO / SIMULATED INVOICE", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
-            title.setSpacingBefore(12);
+            title.setSpacingBefore(6);
             title.setSpacingAfter(15);
             document.add(title);
 
@@ -179,7 +184,7 @@ public class PdfInvoiceService {
             document.add(eco);
 
             // 6. Signoff Footer
-            Paragraph footer = new Paragraph("This is an authenticated computer-generated invoice for academic project demonstration. No physical signature required.", footnoteFont);
+            Paragraph footer = new Paragraph("DEMO / SIMULATED INVOICE -- Generated for academic project demonstration only. Not a valid tax invoice. No real monetary transaction occurred.", footnoteFont);
             footer.setAlignment(Element.ALIGN_CENTER);
             document.add(footer);
 

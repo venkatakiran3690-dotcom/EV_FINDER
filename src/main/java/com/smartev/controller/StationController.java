@@ -48,6 +48,19 @@ public class StationController {
     }
 
     /**
+     * Get stations explicitly assigned to the authenticated station manager.
+     */
+    @GetMapping("/manager/assigned")
+    @PreAuthorize("hasAnyRole('STATION_MANAGER', 'COMPANY_ADMIN', 'PLATFORM_ADMIN')")
+    public ResponseEntity<List<StationResponse>> getAssignedStations(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        User currentUser = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return ResponseEntity.ok(stationService.getAssignedStationsForManager(currentUser));
+    }
+
+    /**
      * Get station details by ID with dynamic charger status, occupancy %, and estimated wait time.
      */
     @GetMapping("/{id}")

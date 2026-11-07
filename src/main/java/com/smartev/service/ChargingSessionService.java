@@ -27,17 +27,29 @@ public class ChargingSessionService {
     private final ChargerRepository chargerRepository;
     private final BillingService billingService;
     private final NotificationRepository notificationRepository;
+    private final StationManagerAssignmentRepository assignmentRepository;
 
     public ChargingSessionService(ChargingSessionRepository sessionRepository,
                                   BookingRepository bookingRepository,
                                   ChargerRepository chargerRepository,
                                   BillingService billingService,
                                   NotificationRepository notificationRepository) {
+        this(sessionRepository, bookingRepository, chargerRepository, billingService, notificationRepository, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public ChargingSessionService(ChargingSessionRepository sessionRepository,
+                                  BookingRepository bookingRepository,
+                                  ChargerRepository chargerRepository,
+                                  BillingService billingService,
+                                  NotificationRepository notificationRepository,
+                                  StationManagerAssignmentRepository assignmentRepository) {
         this.sessionRepository = sessionRepository;
         this.bookingRepository = bookingRepository;
         this.chargerRepository = chargerRepository;
         this.billingService = billingService;
         this.notificationRepository = notificationRepository;
+        this.assignmentRepository = assignmentRepository;
     }
 
     /**
@@ -201,6 +213,14 @@ public class ChargingSessionService {
             return sessionRepository.findByCompanyId(user.getCompany().getId()).stream()
                     .map(this::mapSessionToResponse)
                     .collect(Collectors.toList());
+        } else if (user.getRole() == Role.STATION_MANAGER) {
+            List<Long> assignedIds = assignmentRepository != null
+                    ? assignmentRepository.findByUserId(user.getId()).stream().map(a -> a.getStation().getId()).toList()
+                    : List.of();
+            if (assignedIds.isEmpty()) return List.of();
+            return sessionRepository.findByStationIdInOrderByCreatedAtDesc(assignedIds).stream()
+                    .map(this::mapSessionToResponse)
+                    .collect(Collectors.toList());
         } else {
             return sessionRepository.findAll().stream()
                     .map(this::mapSessionToResponse)
@@ -218,6 +238,15 @@ public class ChargingSessionService {
         } else if (user.getRole() == Role.COMPANY_ADMIN) {
             if (user.getCompany() == null || !user.getCompany().getId().equals(session.getCharger().getStation().getCompany().getId())) {
                 throw new UnauthorizedException("Unauthorized: Session belongs to another company.");
+            }
+        } else if (user.getRole() == Role.STATION_MANAGER) {
+            Station station = session.getCharger().getStation();
+            if (user.getCompany() == null || !user.getCompany().getId().equals(station.getCompany().getId())) {
+                throw new UnauthorizedException("Unauthorized: Session belongs to another company.");
+            }
+            boolean isAssigned = assignmentRepository != null && assignmentRepository.existsByUserIdAndStationId(user.getId(), station.getId());
+            if (!isAssigned) {
+                throw new UnauthorizedException("Unauthorized: Charging session does not belong to an assigned station.");
             }
         }
     }

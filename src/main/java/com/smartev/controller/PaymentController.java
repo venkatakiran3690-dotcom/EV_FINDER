@@ -29,8 +29,9 @@ public class PaymentController {
     /**
      * Submit simulated demo token payment.
      * Supports simulateFailure flag to demonstrate failure handling.
+     * Accessible at both /api/payments and /api/payments/demo
      */
-    @PostMapping("/demo")
+    @PostMapping({"", "/demo"})
     public ResponseEntity<PaymentResponse> processDemoPayment(
             @Valid @RequestBody PaymentRequest request,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {

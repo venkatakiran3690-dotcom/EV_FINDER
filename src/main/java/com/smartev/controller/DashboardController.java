@@ -46,7 +46,7 @@ public class DashboardController {
     public ResponseEntity<DashboardStatsResponse> getManagerDashboard(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         User user = userRepository.findById(userPrincipal.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return ResponseEntity.ok(dashboardService.getCompanyAdminDashboard(user));
+        return ResponseEntity.ok(dashboardService.getStationManagerDashboard(user));
     }
 
     @GetMapping("/admin")

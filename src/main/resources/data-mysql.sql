@@ -15,13 +15,13 @@ ON DUPLICATE KEY UPDATE name=VALUES(name);
 
 -- 2. USERS
 INSERT INTO users (id, email, password_hash, full_name, phone, role, company_id, status) VALUES
-(1, 'admin@smartev.com', '$2a$10$vG.e/N97gH5u2tBskU6/G.bWbK2V/J/8eC77mYQOvy59gq9w0m4o2', 'Chief Platform Administrator', '+91 98765 00001', 'PLATFORM_ADMIN', NULL, 'ACTIVE'),
-(2, 'tatapower@smartev.com', '$2a$10$0zX7g25Hj8Q0mPqJ8zLwDeM9q47r2EwM4jE5yG9p1xK3r5t8y7u6i', 'Rajesh Sharma (Tata CPO Admin)', '+91 98765 00002', 'COMPANY_ADMIN', 1, 'ACTIVE'),
-(3, 'zeon@smartev.com', '$2a$10$9vB7g25Hj8Q0mPqJ8zLwDeM9q47r2EwM4jE5yG9p1xK3r5t8y7u6i', 'Priya Natarajan (Zeon CPO Admin)', '+91 98765 00003', 'COMPANY_ADMIN', 2, 'ACTIVE'),
-(4, 'manager.bangalore@smartev.com', '$2a$10$8wA7g25Hj8Q0mPqJ8zLwDeM9q47r2EwM4jE5yG9p1xK3r5t8y7u6i', 'Suresh Kumar (Hub Manager)', '+91 98765 00004', 'STATION_MANAGER', 1, 'ACTIVE'),
-(5, 'driver@smartev.com', '$2a$10$7vC7g25Hj8Q0mPqJ8zLwDeM9q47r2EwM4jE5yG9p1xK3r5t8y7u6i', 'Venkata Kiran', '+91 98765 43210', 'DRIVER', NULL, 'ACTIVE'),
-(6, 'driver2@smartev.com', '$2a$10$7vC7g25Hj8Q0mPqJ8zLwDeM9q47r2EwM4jE5yG9p1xK3r5t8y7u6i', 'Ananya Reddy', '+91 98765 43211', 'DRIVER', NULL, 'ACTIVE')
-ON DUPLICATE KEY UPDATE email=VALUES(email);
+(1, 'admin@smartev.com', '$2a$10$dTlw2LLYg2t3jGO12o.GLun/Oz4mh9cCXu.t8hKEshhqHjUPHy0TS', 'Chief Platform Administrator', '+91 98765 00001', 'PLATFORM_ADMIN', NULL, 'ACTIVE'),
+(2, 'tatapower@smartev.com', '$2a$10$K0pW3.fCLbYHNGeslh7GHOcUHRRkrb6ge7W5EomTwK/6g.XjPU7ae', 'Rajesh Sharma (Tata CPO Admin)', '+91 98765 00002', 'COMPANY_ADMIN', 1, 'ACTIVE'),
+(3, 'zeon@smartev.com', '$2a$10$retgfgTehY/NWtR/jnMV6O7OlTXHnezYUEYiX8svvSVMQIOv6ChvO', 'Priya Natarajan (Zeon CPO Admin)', '+91 98765 00003', 'COMPANY_ADMIN', 2, 'ACTIVE'),
+(4, 'manager.bangalore@smartev.com', '$2a$10$El37MjYvknbRgcXOnysDKO73ZtbL5lnsO4tedWtC5JdhqVz/a.ru6', 'Suresh Kumar (Hub Manager)', '+91 98765 00004', 'STATION_MANAGER', 1, 'ACTIVE'),
+(5, 'driver@smartev.com', '$2a$10$hQ3abG0tvyE.Bow4srWzM.MwaWPT4QJve8Fg7ROVMKt1yy59y932K', 'Venkata Kiran', '+91 98765 43210', 'DRIVER', NULL, 'ACTIVE'),
+(6, 'driver2@smartev.com', '$2a$10$hQ3abG0tvyE.Bow4srWzM.MwaWPT4QJve8Fg7ROVMKt1yy59y932K', 'Ananya Reddy', '+91 98765 43211', 'DRIVER', NULL, 'ACTIVE')
+ON DUPLICATE KEY UPDATE email=VALUES(email), password_hash=VALUES(password_hash);
 
 -- 3. VEHICLES
 INSERT INTO vehicles (id, driver_id, make, model, model_year, license_plate, battery_capacity_kwh, compatible_connector) VALUES
@@ -66,3 +66,15 @@ INSERT INTO tariffs (id, company_id, station_id, charger_type, price_per_kwh, se
 (2, 2, NULL, 'ALL', 21.00, 30.00, 18.00, NOW(), 'ACTIVE'),
 (3, 3, NULL, 'ALL', 18.50, 20.00, 18.00, NOW(), 'ACTIVE')
 ON DUPLICATE KEY UPDATE price_per_kwh=VALUES(price_per_kwh);
+
+-- 7. STATION MANAGER ASSIGNMENTS
+INSERT INTO station_manager_assignments (id, user_id, station_id, assigned_at) VALUES
+(1, 4, 1, NOW())
+ON DUPLICATE KEY UPDATE station_id=VALUES(station_id);
+
+-- 8. INITIAL ACTIVITY LOGS
+INSERT INTO activity_logs (id, user_id, user_email, user_role, action, details, ip_address, timestamp) VALUES
+(1, 1, 'system@smartev.com', 'SYSTEM', 'Application Startup & Data Seeding Complete', 'Verified 3 CPOs, 5 stations, 17 chargers, and regulated tariffs.', '127.0.0.1', '2026-11-07 10:00:00'),
+(2, 5, 'driver@smartev.com', 'DRIVER', 'Driver Account Onboarded', 'Registered verified driver profile with vehicle KA-01-EV-4096.', '127.0.0.1', '2026-11-07 10:05:00'),
+(3, 4, 'manager.bangalore@smartev.com', 'STATION_MANAGER', 'Hub Station Assignment Initialized', 'Assigned operational management for Tata Power EV Hub - Indiranagar.', '127.0.0.1', '2026-11-07 10:10:00')
+ON DUPLICATE KEY UPDATE action=VALUES(action);

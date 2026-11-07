@@ -169,11 +169,7 @@
                     </thead>
                     <tbody id="activityLogsBody">
                         <tr>
-                            <td>${new Date().toISOString()}</td>
-                            <td>system@smartev.com</td>
-                            <td><span class="badge bg-secondary">SYSTEM</span></td>
-                            <td>Application Startup & Data Seeding Complete</td>
-                            <td>Verified 3 CPOs, 5 stations, 17 chargers, and regulated tariffs.</td>
+                            <td colspan="5" class="text-center py-3 text-muted small">Loading activity logs...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -290,6 +286,9 @@
                 // 4. Load Stations
                 loadPlatformStations();
 
+                // 5. Load Audit Activity Logs
+                loadAuditLogs();
+
             } catch (err) {
                 showAlert('Failed to load platform data: ' + err.message, 'danger');
             }
@@ -387,6 +386,7 @@
                 bootstrap.Modal.getInstance(document.getElementById('addCompModal')).hide();
                 showAlert('Company registered successfully!', 'success');
                 loadCompanies();
+                loadAuditLogs();
             } catch (err) {
                 alert(err.message);
             }
@@ -413,6 +413,7 @@
                 bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
                 showAlert('Administrative user account created!', 'success');
                 loadUsers();
+                loadAuditLogs();
             } catch (err) {
                 alert(err.message);
             }
@@ -446,6 +447,51 @@
                 `).join('');
             } catch (err) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-danger py-2 text-center">${err.message}</td></tr>`;
+            }
+        }
+
+        async function loadAuditLogs() {
+            const tbody = document.getElementById('activityLogsBody');
+            try {
+                const logs = await apiFetch('/admin/logs');
+                if (!logs || logs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-muted small">No audit activity logs recorded.</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = logs.map(l => {
+                    let formattedDate = '-';
+                    if (l.timestamp) {
+                        const d = new Date(l.timestamp);
+                        if (!isNaN(d.getTime())) {
+                            formattedDate = d.getFullYear() + '-' +
+                                String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                                String(d.getDate()).padStart(2, '0') + ' ' +
+                                String(d.getHours()).padStart(2, '0') + ':' +
+                                String(d.getMinutes()).padStart(2, '0') + ':' +
+                                String(d.getSeconds()).padStart(2, '0');
+                        } else {
+                            formattedDate = l.timestamp;
+                        }
+                    }
+
+                    let roleBadge = 'bg-secondary';
+                    if (l.userRole === 'PLATFORM_ADMIN') roleBadge = 'bg-dark';
+                    else if (l.userRole === 'COMPANY_ADMIN') roleBadge = 'bg-primary';
+                    else if (l.userRole === 'STATION_MANAGER') roleBadge = 'bg-warning text-dark';
+                    else if (l.userRole === 'DRIVER') roleBadge = 'bg-success';
+
+                    return `
+                        <tr>
+                            <td><code>${formattedDate}</code></td>
+                            <td>${l.userEmail || '-'}</td>
+                            <td><span class="badge ${roleBadge}">${l.userRole || 'SYSTEM'}</span></td>
+                            <td><strong>${l.action}</strong></td>
+                            <td class="text-muted">${l.details || '-'}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-danger py-2 text-center small">Failed to load audit logs: ${err.message}</td></tr>`;
             }
         }
 

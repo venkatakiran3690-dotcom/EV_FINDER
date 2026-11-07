@@ -1,13 +1,16 @@
 package com.smartev.controller;
 
 import com.smartev.dto.RegisterRequest;
+import com.smartev.dto.UserResponse;
 import com.smartev.entity.*;
 import com.smartev.exception.BadRequestException;
 import com.smartev.exception.ResourceNotFoundException;
 import com.smartev.repository.*;
+import com.smartev.security.UserPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,7 +43,9 @@ public class PlatformAdminController {
     }
 
     @PostMapping("/companies")
-    public ResponseEntity<Company> createCompany(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<Company> createCompany(
+            @RequestBody Map<String, String> payload,
+            @AuthenticationPrincipal UserPrincipal admin) {
         String name = payload.get("name");
         String regNum = payload.get("registrationNumber");
         String email = payload.get("contactEmail");
@@ -52,13 +57,28 @@ public class PlatformAdminController {
         }
 
         Company company = new Company(name, regNum, email, phone, address);
-        return ResponseEntity.ok(companyRepository.save(company));
+        Company saved = companyRepository.save(company);
+
+        // Audit Log
+        String actorEmail = admin != null ? admin.getUsername() : "admin@smartev.com";
+        String actorRole = admin != null ? admin.getRole().name() : "PLATFORM_ADMIN";
+        activityLogRepository.save(new ActivityLog(
+                admin != null ? admin.getId() : 1L,
+                actorEmail,
+                actorRole,
+                "CPO Onboarded: " + saved.getName(),
+                "Registered company with registration " + saved.getRegistrationNumber(),
+                "127.0.0.1"
+        ));
+
+        return ResponseEntity.ok(saved);
     }
 
     @PutMapping("/companies/{id}/status")
     public ResponseEntity<Company> updateCompanyStatus(
             @PathVariable Long id,
-            @RequestBody Map<String, String> payload) {
+            @RequestBody Map<String, String> payload,
+            @AuthenticationPrincipal UserPrincipal admin) {
 
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + id));
@@ -68,19 +88,36 @@ public class PlatformAdminController {
             company.setStatus(status.toUpperCase());
         }
 
-        return ResponseEntity.ok(companyRepository.save(company));
+        Company updated = companyRepository.save(company);
+
+        // Audit Log
+        String actorEmail = admin != null ? admin.getUsername() : "admin@smartev.com";
+        String actorRole = admin != null ? admin.getRole().name() : "PLATFORM_ADMIN";
+        activityLogRepository.save(new ActivityLog(
+                admin != null ? admin.getId() : 1L,
+                actorEmail,
+                actorRole,
+                "CPO Status Updated: " + updated.getName(),
+                "Updated status to " + updated.getStatus(),
+                "127.0.0.1"
+        ));
+
+        return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getUsers(@RequestParam(required = false) Role role) {
-        if (role != null) {
-            return ResponseEntity.ok(userRepository.findByRole(role));
-        }
-        return ResponseEntity.ok(userRepository.findAll());
+    public ResponseEntity<List<UserResponse>> getUsers(@RequestParam(required = false) Role role) {
+        List<User> users = (role != null)
+                ? userRepository.findByRole(role)
+                : userRepository.findAll();
+        List<UserResponse> dtos = users.stream().map(UserResponse::new).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @PostMapping("/users")
-    public ResponseEntity<Map<String, Object>> createPrivilegedUser(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<Map<String, Object>> createPrivilegedUser(
+            @RequestBody Map<String, String> payload,
+            @AuthenticationPrincipal UserPrincipal admin) {
         String email = payload.get("email");
         String password = payload.get("password");
         String fullName = payload.get("fullName");
@@ -111,7 +148,20 @@ public class PlatformAdminController {
                 company
         );
 
-        userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        // Audit Log
+        String actorEmail = admin != null ? admin.getUsername() : "admin@smartev.com";
+        String actorRole = admin != null ? admin.getRole().name() : "PLATFORM_ADMIN";
+        activityLogRepository.save(new ActivityLog(
+                admin != null ? admin.getId() : 1L,
+                actorEmail,
+                actorRole,
+                "Privileged User Created: " + saved.getEmail(),
+                "Created account for " + saved.getFullName() + " with role " + saved.getRole(),
+                "127.0.0.1"
+        ));
+
         return ResponseEntity.ok(Map.of("success", true, "message", "User created with role " + role));
     }
 
