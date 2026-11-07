@@ -18,6 +18,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import java.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+
 @Service
 public class StationService {
 
@@ -27,6 +30,13 @@ public class StationService {
     private final TariffRepository tariffRepository;
     private final ReviewRepository reviewRepository;
     private final GeofenceService geofenceService;
+    private final BookingRepository bookingRepository;
+    private final BillRepository billRepository;
+    private final ChargingSessionRepository sessionRepository;
+    private final PaymentRepository paymentRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final MaintenanceRecordRepository maintenanceRecordRepository;
+    private final StationManagerAssignmentRepository assignmentRepository;
 
     public StationService(StationRepository stationRepository,
                           ChargerRepository chargerRepository,
@@ -34,12 +44,37 @@ public class StationService {
                           TariffRepository tariffRepository,
                           ReviewRepository reviewRepository,
                           GeofenceService geofenceService) {
+        this(stationRepository, chargerRepository, companyRepository, tariffRepository,
+             reviewRepository, geofenceService, null, null, null, null, null, null, null);
+    }
+
+    @Autowired
+    public StationService(StationRepository stationRepository,
+                          ChargerRepository chargerRepository,
+                          CompanyRepository companyRepository,
+                          TariffRepository tariffRepository,
+                          ReviewRepository reviewRepository,
+                          GeofenceService geofenceService,
+                          @Autowired(required = false) BookingRepository bookingRepository,
+                          @Autowired(required = false) BillRepository billRepository,
+                          @Autowired(required = false) ChargingSessionRepository sessionRepository,
+                          @Autowired(required = false) PaymentRepository paymentRepository,
+                          @Autowired(required = false) FavoriteRepository favoriteRepository,
+                          @Autowired(required = false) MaintenanceRecordRepository maintenanceRecordRepository,
+                          @Autowired(required = false) StationManagerAssignmentRepository assignmentRepository) {
         this.stationRepository = stationRepository;
         this.chargerRepository = chargerRepository;
         this.companyRepository = companyRepository;
         this.tariffRepository = tariffRepository;
         this.reviewRepository = reviewRepository;
         this.geofenceService = geofenceService;
+        this.bookingRepository = bookingRepository;
+        this.billRepository = billRepository;
+        this.sessionRepository = sessionRepository;
+        this.paymentRepository = paymentRepository;
+        this.favoriteRepository = favoriteRepository;
+        this.maintenanceRecordRepository = maintenanceRecordRepository;
+        this.assignmentRepository = assignmentRepository;
     }
 
     @Transactional(readOnly = true)
@@ -280,6 +315,146 @@ public class StationService {
             if (user.getCompany() == null || !user.getCompany().getId().equals(station.getCompany().getId())) {
                 throw new UnauthorizedException("Unauthorized: Station belongs to a different charging company.");
             }
+        }
+    }
+
+    @Transactional
+    public StationResponse updateStation(Long stationId, StationCreateRequest request, User currentUser) {
+        Station station = stationRepository.findById(stationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Station not found with ID: " + stationId));
+
+        validateCompanyAccess(station, currentUser);
+
+        if (request.getName() != null && !request.getName().trim().isEmpty()) {
+            station.setName(request.getName().trim());
+        }
+        if (request.getAddress() != null && !request.getAddress().trim().isEmpty()) {
+            station.setAddress(request.getAddress().trim());
+        }
+        if (request.getCity() != null && !request.getCity().trim().isEmpty()) {
+            station.setCity(request.getCity().trim());
+        }
+        if (request.getState() != null) {
+            station.setState(request.getState().trim());
+        }
+        if (request.getPostalCode() != null) {
+            station.setPostalCode(request.getPostalCode().trim());
+        }
+        if (request.getLatitude() != null) {
+            station.setLatitude(request.getLatitude());
+        }
+        if (request.getLongitude() != null) {
+            station.setLongitude(request.getLongitude());
+        }
+        if (request.getOperationalStatus() != null && !request.getOperationalStatus().trim().isEmpty()) {
+            station.setOperationalStatus(request.getOperationalStatus().trim().toUpperCase());
+        }
+
+        Station updated = stationRepository.save(station);
+        return buildStationResponse(updated, null, null);
+    }
+
+    @Transactional
+    public void deleteStation(Long stationId, User currentUser) {
+        Station station = stationRepository.findById(stationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Station not found with ID: " + stationId));
+
+        validateCompanyAccess(station, currentUser);
+
+        // Check if there are active bookings
+        if (bookingRepository != null) {
+            List<Booking> bookings = bookingRepository.findByStationIdOrderByStartTimeDesc(stationId);
+            boolean hasActive = bookings.stream().anyMatch(b ->
+                    "PENDING_PAYMENT".equalsIgnoreCase(b.getStatus()) ||
+                    "CONFIRMED".equalsIgnoreCase(b.getStatus()) ||
+                    "IN_PROGRESS".equalsIgnoreCase(b.getStatus())
+            );
+            if (hasActive) {
+                throw new BadRequestException("Cannot delete station with active confirmed or pending bookings. Please cancel them first.");
+            }
+
+            // Clean up past bookings and their sessions/bills/payments
+            for (Booking b : bookings) {
+                if (sessionRepository != null) {
+                    sessionRepository.findByBookingId(b.getId()).ifPresent(session -> {
+                        if (billRepository != null) {
+                            billRepository.findBySessionId(session.getId()).ifPresent(billRepository::delete);
+                        }
+                        sessionRepository.delete(session);
+                    });
+                }
+                if (paymentRepository != null) {
+                    paymentRepository.findByBookingId(b.getId()).forEach(paymentRepository::delete);
+                }
+                bookingRepository.delete(b);
+            }
+        }
+
+        // Clean up any stray bills for this station
+        if (billRepository != null) {
+            billRepository.findByStationIdOrderByCreatedAtDesc(stationId).forEach(billRepository::delete);
+        }
+
+        // Clean up any stray sessions for this station
+        if (sessionRepository != null) {
+            sessionRepository.findByStationId(stationId).forEach(sessionRepository::delete);
+        }
+
+        // Clean up reviews
+        if (reviewRepository != null) {
+            reviewRepository.findByStationIdOrderByCreatedAtDesc(stationId).forEach(reviewRepository::delete);
+        }
+
+        // Clean up favorites
+        if (favoriteRepository != null) {
+            favoriteRepository.findByStationId(stationId).forEach(favoriteRepository::delete);
+        }
+
+        // Clean up tariffs
+        if (tariffRepository != null) {
+            tariffRepository.findByStationId(stationId).forEach(tariffRepository::delete);
+        }
+
+        // Clean up maintenance records
+        if (maintenanceRecordRepository != null) {
+            maintenanceRecordRepository.findByStationIdOrderByCreatedAtDesc(stationId).forEach(maintenanceRecordRepository::delete);
+        }
+
+        // Clean up station manager assignments
+        if (assignmentRepository != null) {
+            assignmentRepository.findByStationId(stationId).forEach(assignmentRepository::delete);
+        }
+
+        // Clean up chargers
+        if (chargerRepository != null) {
+            chargerRepository.findByStationId(stationId).forEach(chargerRepository::delete);
+        }
+
+        // Delete station
+        stationRepository.delete(station);
+    }
+
+    @Transactional
+    public void deleteCharger(Long chargerId, User currentUser) {
+        Charger charger = chargerRepository.findById(chargerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Charger not found with ID: " + chargerId));
+
+        validateCompanyAccess(charger.getStation(), currentUser);
+
+        // Check active bookings on this charger
+        if (bookingRepository != null) {
+            List<Booking> conflicts = bookingRepository.findConflictingBookings(
+                    chargerId, LocalDateTime.now(), LocalDateTime.now().plusYears(1));
+            if (!conflicts.isEmpty()) {
+                throw new BadRequestException("Cannot delete charger with upcoming active bookings.");
+            }
+        }
+
+        Station station = charger.getStation();
+        chargerRepository.delete(charger);
+        if (station.getTotalChargers() > 0) {
+            station.setTotalChargers(station.getTotalChargers() - 1);
+            stationRepository.save(station);
         }
     }
 }

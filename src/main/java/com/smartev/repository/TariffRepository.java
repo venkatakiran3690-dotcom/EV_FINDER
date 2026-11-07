@@ -14,6 +14,8 @@ public interface TariffRepository extends JpaRepository<Tariff, Long> {
 
     List<Tariff> findByCompanyId(Long companyId);
 
+    List<Tariff> findByStationId(Long stationId);
+
     List<Tariff> findByCompanyIdAndStatus(Long companyId, String status);
 
     @Query("SELECT t FROM Tariff t WHERE t.company.id = :companyId " +

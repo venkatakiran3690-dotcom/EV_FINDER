@@ -194,6 +194,60 @@
         </div>
     </div>
 
+    <!-- Edit Station Modal -->
+    <div class="modal fade" id="editStationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Edit Charging Hub</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editStationForm">
+                        <input type="hidden" id="editStationId">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Station Name</label>
+                            <input type="text" id="editSName" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Street Address</label>
+                            <input type="text" id="editSAddress" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">City</label>
+                                <input type="text" id="editSCity" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">State</label>
+                                <input type="text" id="editSState" class="form-control form-control-sm" required>
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Latitude</label>
+                                <input type="number" step="0.0001" id="editSLat" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Longitude</label>
+                                <input type="number" step="0.0001" id="editSLon" class="form-control form-control-sm" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Operational Status</label>
+                            <select id="editSStatus" class="form-select form-select-sm">
+                                <option value="OPERATIONAL">Operational</option>
+                                <option value="UNDER_MAINTENANCE">Under Maintenance</option>
+                                <option value="TEMPORARILY_CLOSED">Temporarily Closed</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Charger Modal -->
     <div class="modal fade" id="addChargerModal" tabindex="-1">
         <div class="modal-dialog">
@@ -355,16 +409,25 @@
                     return;
                 }
 
-                container.innerHTML = stations.map(s => `
-                    <div class="card border rounded-3 p-3 mb-3 bg-light">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
+                container.innerHTML = stations.map(s => {
+                    const sJson = encodeURIComponent(JSON.stringify(s));
+                    return `
+                    <div class="card border rounded-3 p-3 mb-3 bg-light shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div>
-                                <h6 class="fw-bold mb-0">${s.name}</h6>
-                                <span class="small text-muted">${s.address}, ${s.city}</span>
+                                <h6 class="fw-bold mb-0 text-dark">${s.name}</h6>
+                                <span class="small text-muted">${s.address}, ${s.city} (Lat: ${s.latitude}, Lng: ${s.longitude})</span>
+                                <span class="badge ${s.operationalStatus === 'OPERATIONAL' ? 'bg-success' : 'bg-warning'} ms-2" style="font-size: 0.65rem;">${s.operationalStatus}</span>
                             </div>
-                            <div>
-                                <button class="btn btn-outline-success btn-sm py-1" onclick="openAddChargerModal(${s.id})">
-                                    <i class="bi bi-plus-lg"></i> Add Charger
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-outline-success btn-sm py-1 px-2" onclick="openAddChargerModal(${s.id})" title="Add Charger">
+                                    <i class="bi bi-plus-lg"></i> Charger
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm py-1 px-2" onclick="openEditStationModal('${sJson}')" title="Edit Station Details">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm py-1 px-2" onclick="confirmDeleteStation(${s.id}, '${s.name.replace(/'/g, "\\'")}')" title="Delete Station">
+                                    <i class="bi bi-trash"></i> Delete
                                 </button>
                             </div>
                         </div>
@@ -378,14 +441,18 @@
                                         <div class="bg-white p-2 rounded border small d-flex justify-content-between align-items-center">
                                             <div>
                                                 <strong>${chg.chargerIdentifier}</strong>
-                                                <div class="text-muted">${chg.chargerType} (${chg.connectorType}, ${chg.powerRatingKw} kW)</div>
+                                                <div class="text-muted" style="font-size: 0.72rem;">${chg.chargerType} (${chg.connectorType}, ${chg.powerRatingKw} kW)</div>
                                             </div>
-                                            <div>
-                                                <select class="form-select form-select-sm py-0" style="font-size: 0.75rem;"
+                                            <div class="d-flex align-items-center gap-1">
+                                                <select class="form-select form-select-sm py-0" style="font-size: 0.72rem; width: 110px;"
                                                         onchange="updateChargerOperationalStatus(${chg.id}, this.value)">
                                                     <option value="OPERATIONAL" ${chg.operationalStatus === 'OPERATIONAL' ? 'selected' : ''}>Operational</option>
                                                     <option value="OUT_OF_SERVICE" ${chg.operationalStatus === 'OUT_OF_SERVICE' ? 'selected' : ''}>Out of Service</option>
                                                 </select>
+                                                <button class="btn btn-outline-danger btn-sm py-0 px-2" style="font-size: 0.75rem;"
+                                                        onclick="confirmDeleteCharger(${chg.id}, '${chg.chargerIdentifier}')" title="Delete Charger Post">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -393,7 +460,8 @@
                             </div>
                         </div>
                     </div>
-                `).join('');
+                `;
+                }).join('');
             } catch (err) {
                 container.innerHTML = `<div class="text-danger small">Error loading stations</div>`;
             }
@@ -502,6 +570,78 @@
                 alert(err.message);
             }
         });
+
+        function openEditStationModal(stationJsonStr) {
+            try {
+                const s = JSON.parse(decodeURIComponent(stationJsonStr));
+                document.getElementById('editStationId').value = s.id;
+                document.getElementById('editSName').value = s.name || '';
+                document.getElementById('editSAddress').value = s.address || '';
+                document.getElementById('editSCity').value = s.city || '';
+                document.getElementById('editSState').value = s.state || '';
+                document.getElementById('editSLat').value = s.latitude || '';
+                document.getElementById('editSLon').value = s.longitude || '';
+                document.getElementById('editSStatus').value = s.operationalStatus || 'OPERATIONAL';
+                new bootstrap.Modal(document.getElementById('editStationModal')).show();
+            } catch (e) {
+                console.error("Error opening edit station modal:", e);
+            }
+        }
+
+        document.getElementById('editStationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const stationId = document.getElementById('editStationId').value;
+            const payload = {
+                name: document.getElementById('editSName').value.trim(),
+                address: document.getElementById('editSAddress').value.trim(),
+                city: document.getElementById('editSCity').value.trim(),
+                state: document.getElementById('editSState').value.trim(),
+                latitude: parseFloat(document.getElementById('editSLat').value),
+                longitude: parseFloat(document.getElementById('editSLon').value),
+                operationalStatus: document.getElementById('editSStatus').value
+            };
+            try {
+                await apiFetch(`/stations/${stationId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(payload)
+                });
+                bootstrap.Modal.getInstance(document.getElementById('editStationModal')).hide();
+                showAlert('Station details updated successfully!', 'success');
+                initCompanyDashboard();
+            } catch (err) {
+                alert('Update failed: ' + err.message);
+            }
+        });
+
+        async function confirmDeleteStation(stationId, stationName) {
+            if (!confirm(`Are you sure you want to permanently delete "${stationName}"?\n\nThis will remove the charging station and all its associated charger hardware.`)) {
+                return;
+            }
+            try {
+                await apiFetch(`/stations/${stationId}`, {
+                    method: 'DELETE'
+                });
+                showAlert(`Station "${stationName}" has been deleted successfully!`, 'success');
+                initCompanyDashboard();
+            } catch (err) {
+                alert('Delete failed: ' + err.message);
+            }
+        }
+
+        async function confirmDeleteCharger(chargerId, chargerIdentifier) {
+            if (!confirm(`Are you sure you want to remove charger post "${chargerIdentifier}"?`)) {
+                return;
+            }
+            try {
+                await apiFetch(`/stations/chargers/${chargerId}`, {
+                    method: 'DELETE'
+                });
+                showAlert(`Charger "${chargerIdentifier}" has been removed.`, 'success');
+                initCompanyDashboard();
+            } catch (err) {
+                alert('Delete charger failed: ' + err.message);
+            }
+        }
 
         function openAddChargerModal(stationId) {
             document.getElementById('chgStationId').value = stationId;

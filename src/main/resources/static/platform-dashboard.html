@@ -128,6 +128,31 @@
             </div>
         </div>
 
+        <!-- All Stations Management -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-ev-station text-primary me-2"></i> All Charging Stations (Platform-Wide)</h5>
+                <span class="badge bg-light text-dark border" id="pStationsCount">0 Stations</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle small mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Station Name</th>
+                            <th>CPO Company</th>
+                            <th>Location / City</th>
+                            <th>Chargers</th>
+                            <th>Status</th>
+                            <th class="text-end">Manage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="platformStationsBody">
+                        <tr><td colspan="6" class="text-center py-3 text-muted">Loading stations...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Audit Activity Logs -->
         <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
             <h5 class="fw-bold mb-3"><i class="bi bi-journal-text text-secondary me-2"></i> System Activity & Security Audit Logs</h5>
@@ -262,6 +287,9 @@
                 // 3. Load Users
                 loadUsers();
 
+                // 4. Load Stations
+                loadPlatformStations();
+
             } catch (err) {
                 showAlert('Failed to load platform data: ' + err.message, 'danger');
             }
@@ -389,6 +417,50 @@
                 alert(err.message);
             }
         });
+
+        async function loadPlatformStations() {
+            const tbody = document.getElementById('platformStationsBody');
+            try {
+                const stations = await apiFetch('/stations');
+                document.getElementById('pStationsCount').innerText = `${stations.length} Stations`;
+                if (stations.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-3 text-muted">No charging stations registered.</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = stations.map(s => `
+                    <tr>
+                        <td>
+                            <strong>${s.name}</strong>
+                            <div class="text-muted" style="font-size: 0.72rem;">Lat: ${s.latitude}, Lng: ${s.longitude}</div>
+                        </td>
+                        <td><span class="badge bg-primary-subtle text-primary border">${s.companyName}</span></td>
+                        <td>${s.address}, ${s.city}</td>
+                        <td><strong>${s.totalChargers}</strong> posts</td>
+                        <td><span class="badge ${s.operationalStatus === 'OPERATIONAL' ? 'bg-success' : 'bg-warning'}">${s.operationalStatus}</span></td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-danger btn-sm py-0 px-2" onclick="confirmDeletePlatformStation(${s.id}, '${s.name.replace(/'/g, "\\'")}')">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-danger py-2 text-center">${err.message}</td></tr>`;
+            }
+        }
+
+        async function confirmDeletePlatformStation(stationId, stationName) {
+            if (!confirm(`Are you sure you want to permanently delete station "${stationName}"?\n\nThis will remove the station and all its associated charger hardware.`)) {
+                return;
+            }
+            try {
+                await apiFetch(`/stations/${stationId}`, { method: 'DELETE' });
+                showAlert(`Station "${stationName}" deleted successfully!`, 'success');
+                initPlatformAdmin();
+            } catch (err) {
+                alert('Delete failed: ' + err.message);
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', initPlatformAdmin);
     </script>

@@ -115,4 +115,49 @@ public class StationController {
 
         return ResponseEntity.ok(stationService.updateChargerStatus(id, operationalStatus, availabilityStatus, currentUser));
     }
+
+    /**
+     * Update/Edit station details (Company Admin or Platform Admin).
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'PLATFORM_ADMIN')")
+    public ResponseEntity<StationResponse> updateStation(
+            @PathVariable Long id,
+            @Valid @RequestBody StationCreateRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        User currentUser = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return ResponseEntity.ok(stationService.updateStation(id, request, currentUser));
+    }
+
+    /**
+     * Delete a charging station and all associated chargers (Company Admin or Platform Admin).
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'PLATFORM_ADMIN')")
+    public ResponseEntity<Map<String, String>> deleteStation(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        User currentUser = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        stationService.deleteStation(id, currentUser);
+        return ResponseEntity.ok(Map.of("message", "Station deleted successfully"));
+    }
+
+    /**
+     * Delete an individual charger post from a station.
+     */
+    @DeleteMapping("/chargers/{chargerId}")
+    @PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'PLATFORM_ADMIN')")
+    public ResponseEntity<Map<String, String>> deleteCharger(
+            @PathVariable Long chargerId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        User currentUser = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        stationService.deleteCharger(chargerId, currentUser);
+        return ResponseEntity.ok(Map.of("message", "Charger deleted successfully"));
+    }
 }

@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     List<Favorite> findByDriverIdOrderByCreatedAtDesc(Long driverId);
+    List<Favorite> findByStationId(Long stationId);
     boolean existsByDriverIdAndStationId(Long driverId, Long stationId);
     Optional<Favorite> findByDriverIdAndStationId(Long driverId, Long stationId);
     void deleteByDriverIdAndStationId(Long driverId, Long stationId);
