@@ -12,9 +12,12 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -182,5 +185,78 @@ class BookingServiceTest {
 
         BookingResponse cancelResponse = bookingService.cancelBooking(202L, driver);
         assertEquals("CANCELLED", cancelResponse.getStatus());
+    }
+
+    @Test
+    @DisplayName("Should prevent race condition: exactly one of two concurrent overlapping booking requests succeeds")
+    void testConcurrentOverlappingBookingRequests() throws InterruptedException {
+        LocalDateTime requestedStart = LocalDateTime.now().plusHours(2);
+
+        List<Booking> committedBookings = Collections.synchronizedList(new ArrayList<>());
+
+        when(chargerRepository.findByIdWithPessimisticLock(100L)).thenReturn(Optional.of(charger));
+        when(chargerRepository.findById(100L)).thenReturn(Optional.of(charger));
+
+        when(bookingRepository.findConflictingBookings(eq(100L), any(), any())).thenAnswer(inv -> {
+            synchronized (committedBookings) {
+                return new ArrayList<>(committedBookings);
+            }
+        });
+
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(inv -> {
+            Booking b = inv.getArgument(0);
+            b.setId(1000L + committedBookings.size());
+            synchronized (committedBookings) {
+                committedBookings.add(b);
+            }
+            return b;
+        });
+
+        int numThreads = 2;
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+        CountDownLatch readyLatch = new CountDownLatch(numThreads);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(numThreads);
+
+        AtomicInteger successCount = new AtomicInteger(0);
+        AtomicInteger conflictCount = new AtomicInteger(0);
+
+        for (int i = 0; i < numThreads; i++) {
+            final int index = i;
+            executor.submit(() -> {
+                readyLatch.countDown();
+                try {
+                    startLatch.await(); // wait for simultaneous release
+                    BookingRequest request = new BookingRequest();
+                    request.setStationId(10L);
+                    request.setChargerId(100L);
+                    request.setStartTime(requestedStart);
+                    request.setDurationMinutes(60);
+                    request.setDriverLatitude(12.9500);
+                    request.setDriverLongitude(77.6000);
+
+                    User reqDriver = new User("driver" + index + "@smartev.com", "hash", "Driver " + index, "111", Role.DRIVER, null);
+                    reqDriver.setId(50L + index);
+
+                    bookingService.createBooking(request, reqDriver);
+                    successCount.incrementAndGet();
+                } catch (SlotConflictException e) {
+                    conflictCount.incrementAndGet();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        readyLatch.await();
+        startLatch.countDown(); // simultaneous fire
+        assertTrue(doneLatch.await(5, TimeUnit.SECONDS), "Concurrent booking execution timed out");
+        executor.shutdown();
+
+        assertEquals(1, successCount.get(), "Exactly one concurrent booking should succeed");
+        assertEquals(1, conflictCount.get(), "The competing concurrent booking must fail with SlotConflictException");
+        assertEquals(1, committedBookings.size(), "Only one booking should be saved to database");
     }
 }

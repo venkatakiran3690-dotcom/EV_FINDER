@@ -10,7 +10,9 @@ import java.util.List;
 public interface MaintenanceRecordRepository extends JpaRepository<MaintenanceRecord, Long> {
     List<MaintenanceRecord> findByCompanyIdOrderByCreatedAtDesc(Long companyId);
     List<MaintenanceRecord> findByStationIdOrderByCreatedAtDesc(Long stationId);
+    List<MaintenanceRecord> findByStationIdInOrderByCreatedAtDesc(List<Long> stationIds);
     List<MaintenanceRecord> findByStatus(String status);
     long countByCompanyIdAndStatus(Long companyId, String status);
     long countByStationIdAndStatus(Long stationId, String status);
+    long countByStationIdInAndStatus(List<Long> stationIds, String status);
 }

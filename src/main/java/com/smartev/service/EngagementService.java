@@ -24,6 +24,7 @@ public class EngagementService {
     private final StationRepository stationRepository;
     private final ChargerRepository chargerRepository;
     private final CompanyRepository companyRepository;
+    private final StationManagerAssignmentRepository assignmentRepository;
 
     public EngagementService(ReviewRepository reviewRepository,
                              FavoriteRepository favoriteRepository,
@@ -33,6 +34,20 @@ public class EngagementService {
                              StationRepository stationRepository,
                              ChargerRepository chargerRepository,
                              CompanyRepository companyRepository) {
+        this(reviewRepository, favoriteRepository, notificationRepository, complaintRepository,
+             maintenanceRepository, stationRepository, chargerRepository, companyRepository, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public EngagementService(ReviewRepository reviewRepository,
+                             FavoriteRepository favoriteRepository,
+                             NotificationRepository notificationRepository,
+                             ComplaintRepository complaintRepository,
+                             MaintenanceRecordRepository maintenanceRepository,
+                             StationRepository stationRepository,
+                             ChargerRepository chargerRepository,
+                             CompanyRepository companyRepository,
+                             StationManagerAssignmentRepository assignmentRepository) {
         this.reviewRepository = reviewRepository;
         this.favoriteRepository = favoriteRepository;
         this.notificationRepository = notificationRepository;
@@ -41,6 +56,7 @@ public class EngagementService {
         this.stationRepository = stationRepository;
         this.chargerRepository = chargerRepository;
         this.companyRepository = companyRepository;
+        this.assignmentRepository = assignmentRepository;
     }
 
     // --- Reviews ---
@@ -160,6 +176,20 @@ public class EngagementService {
         Station station = stationRepository.findById(request.getStationId())
                 .orElseThrow(() -> new ResourceNotFoundException("Station not found with ID: " + request.getStationId()));
 
+        if (user.getRole() == Role.STATION_MANAGER) {
+            if (user.getCompany() == null || !user.getCompany().getId().equals(station.getCompany().getId())) {
+                throw new UnauthorizedException("Unauthorized: Station belongs to a different charging company.");
+            }
+            boolean isAssigned = assignmentRepository != null && assignmentRepository.existsByUserIdAndStationId(user.getId(), station.getId());
+            if (!isAssigned) {
+                throw new UnauthorizedException("Unauthorized: Cannot manage maintenance for an unassigned station.");
+            }
+        } else if (user.getRole() == Role.COMPANY_ADMIN) {
+            if (user.getCompany() == null || !user.getCompany().getId().equals(station.getCompany().getId())) {
+                throw new UnauthorizedException("Unauthorized: Station belongs to a different charging company.");
+            }
+        }
+
         Charger charger = null;
         if (request.getChargerId() != null) {
             charger = chargerRepository.findById(request.getChargerId()).orElse(null);
@@ -187,6 +217,14 @@ public class EngagementService {
         if (user.getRole() == Role.COMPANY_ADMIN) {
             if (user.getCompany() == null) return List.of();
             return maintenanceRepository.findByCompanyIdOrderByCreatedAtDesc(user.getCompany().getId()).stream()
+                    .map(this::mapMaintenanceToResponse)
+                    .collect(Collectors.toList());
+        } else if (user.getRole() == Role.STATION_MANAGER) {
+            List<Long> assignedIds = assignmentRepository != null
+                    ? assignmentRepository.findByUserId(user.getId()).stream().map(a -> a.getStation().getId()).toList()
+                    : List.of();
+            if (assignedIds.isEmpty()) return List.of();
+            return maintenanceRepository.findByStationIdInOrderByCreatedAtDesc(assignedIds).stream()
                     .map(this::mapMaintenanceToResponse)
                     .collect(Collectors.toList());
         } else {

@@ -21,6 +21,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByStationCompanyIdOrderByStartTimeDesc(Long companyId);
 
+    List<Booking> findByStationIdInOrderByStartTimeDesc(List<Long> stationIds);
+
+    long countByStationIdIn(List<Long> stationIds);
+
     @Query("SELECT b FROM Booking b WHERE b.charger.id = :chargerId " +
            "AND b.status IN ('PENDING_PAYMENT', 'CONFIRMED', 'IN_PROGRESS') " +
            "AND b.startTime < :requestedEnd " +

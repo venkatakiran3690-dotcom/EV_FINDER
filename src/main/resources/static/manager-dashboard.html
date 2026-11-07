@@ -123,8 +123,8 @@
             }
 
             try {
-                // Fetch stations & chargers
-                const allStations = await apiFetch('/stations');
+                // Fetch stations & chargers strictly assigned to this manager
+                const allStations = await apiFetch('/stations/manager/assigned');
                 const container = document.getElementById('chargersListContainer');
 
                 if (allStations.length === 0) {

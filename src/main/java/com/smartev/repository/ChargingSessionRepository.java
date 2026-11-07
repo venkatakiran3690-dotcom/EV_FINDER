@@ -28,6 +28,12 @@ public interface ChargingSessionRepository extends JpaRepository<ChargingSession
     @Query("SELECT s FROM ChargingSession s WHERE s.charger.station.id = :stationId ORDER BY s.createdAt DESC")
     List<ChargingSession> findByStationId(@Param("stationId") Long stationId);
 
+    @Query("SELECT s FROM ChargingSession s WHERE s.charger.station.id IN :stationIds ORDER BY s.createdAt DESC")
+    List<ChargingSession> findByStationIdInOrderByCreatedAtDesc(@Param("stationIds") List<Long> stationIds);
+
+    @Query("SELECT COUNT(s) FROM ChargingSession s WHERE s.charger.station.id IN :stationIds AND s.status = :status")
+    long countByStationIdInAndStatus(@Param("stationIds") List<Long> stationIds, @Param("status") String status);
+
     @Query("SELECT COUNT(s) FROM ChargingSession s WHERE s.charger.station.company.id = :companyId AND s.status = :status")
     long countByCompanyIdAndStatus(@Param("companyId") Long companyId, @Param("status") String status);
 

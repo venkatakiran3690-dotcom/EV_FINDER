@@ -25,6 +25,8 @@ public class StationCreateRequest {
     @NotNull(message = "Longitude is required")
     private Double longitude;
 
+    private String operationalStatus;
+
     public StationCreateRequest() {}
 
     public Long getCompanyId() { return companyId; }
@@ -50,4 +52,7 @@ public class StationCreateRequest {
 
     public Double getLongitude() { return longitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public String getOperationalStatus() { return operationalStatus; }
+    public void setOperationalStatus(String operationalStatus) { this.operationalStatus = operationalStatus; }
 }

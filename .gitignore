@@ -33,5 +33,10 @@ target/
 .env
 .env.local
 *.log
+mysql_data/
+*.pem
+*.key
+*.p12
+*.pfx
 .m2/repository/
 apache-maven-3.9.9/

@@ -26,6 +26,8 @@ public class DataLoader implements CommandLineRunner {
     private final BillRepository billRepository;
     private final ReviewRepository reviewRepository;
     private final NotificationRepository notificationRepository;
+    private final StationManagerAssignmentRepository assignmentRepository;
+    private final ActivityLogRepository activityLogRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${app.seed-demo-data:true}")
@@ -43,6 +45,8 @@ public class DataLoader implements CommandLineRunner {
                       BillRepository billRepository,
                       ReviewRepository reviewRepository,
                       NotificationRepository notificationRepository,
+                      StationManagerAssignmentRepository assignmentRepository,
+                      ActivityLogRepository activityLogRepository,
                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
@@ -56,6 +60,8 @@ public class DataLoader implements CommandLineRunner {
         this.billRepository = billRepository;
         this.reviewRepository = reviewRepository;
         this.notificationRepository = notificationRepository;
+        this.assignmentRepository = assignmentRepository;
+        this.activityLogRepository = activityLogRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -209,6 +215,10 @@ public class DataLoader implements CommandLineRunner {
                 4
         );
         stationRepository.save(station1);
+
+        // Explicitly assign Station Manager (Suresh Kumar) to Station 1 (Indiranagar Hub)
+        StationManagerAssignment managerAssignment = new StationManagerAssignment(stationManager, station1);
+        assignmentRepository.save(managerAssignment);
 
         // Station 2: Zeon Charging - Electronic City Expressway (Bangalore)
         Station station2 = new Station(
@@ -424,5 +434,38 @@ public class DataLoader implements CommandLineRunner {
                 "SYSTEM"
         );
         notificationRepository.save(welcomeNote);
+
+        // Seed Initial System Activity and Security Audit Logs
+        if (activityLogRepository.count() == 0) {
+            ActivityLog startupLog = new ActivityLog(
+                    1L,
+                    "system@smartev.com",
+                    "SYSTEM",
+                    "Application Startup & Data Seeding Complete",
+                    "Verified 3 CPOs, 5 stations, 17 chargers, and regulated tariffs.",
+                    "127.0.0.1"
+            );
+            activityLogRepository.save(startupLog);
+
+            ActivityLog driverRegLog = new ActivityLog(
+                    5L,
+                    "driver@smartev.com",
+                    "DRIVER",
+                    "Driver Account Onboarded",
+                    "Registered verified driver profile with vehicle KA-01-EV-4096.",
+                    "127.0.0.1"
+            );
+            activityLogRepository.save(driverRegLog);
+
+            ActivityLog managerAssignLog = new ActivityLog(
+                    4L,
+                    "manager.bangalore@smartev.com",
+                    "STATION_MANAGER",
+                    "Hub Station Assignment Initialized",
+                    "Assigned operational management for Tata Power EV Hub - Indiranagar.",
+                    "127.0.0.1"
+            );
+            activityLogRepository.save(managerAssignLog);
+        }
     }
 }

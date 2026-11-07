@@ -8,6 +8,7 @@ import com.smartev.exception.ResourceNotFoundException;
 import com.smartev.exception.SlotConflictException;
 import com.smartev.exception.UnauthorizedException;
 import com.smartev.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -28,6 +29,7 @@ public class BookingService {
     private final VehicleRepository vehicleRepository;
     private final NotificationRepository notificationRepository;
     private final GeofenceService geofenceService;
+    private final StationManagerAssignmentRepository assignmentRepository;
     private final BigDecimal demoTokenAmount;
 
     public BookingService(BookingRepository bookingRepository,
@@ -36,6 +38,18 @@ public class BookingService {
                           VehicleRepository vehicleRepository,
                           NotificationRepository notificationRepository,
                           GeofenceService geofenceService,
+                          BigDecimal demoTokenAmount) {
+        this(bookingRepository, stationRepository, chargerRepository, vehicleRepository, notificationRepository, geofenceService, null, demoTokenAmount);
+    }
+
+    @Autowired
+    public BookingService(BookingRepository bookingRepository,
+                          StationRepository stationRepository,
+                          ChargerRepository chargerRepository,
+                          VehicleRepository vehicleRepository,
+                          NotificationRepository notificationRepository,
+                          GeofenceService geofenceService,
+                          StationManagerAssignmentRepository assignmentRepository,
                           @Value("${app.payment.demo-token-amount:150.00}") BigDecimal demoTokenAmount) {
         this.bookingRepository = bookingRepository;
         this.stationRepository = stationRepository;
@@ -43,6 +57,7 @@ public class BookingService {
         this.vehicleRepository = vehicleRepository;
         this.notificationRepository = notificationRepository;
         this.geofenceService = geofenceService;
+        this.assignmentRepository = assignmentRepository;
         this.demoTokenAmount = demoTokenAmount != null ? demoTokenAmount.setScale(2, java.math.RoundingMode.HALF_UP) : new BigDecimal("150.00");
     }
 
@@ -71,9 +86,10 @@ public class BookingService {
             throw new BadRequestException("Station '" + station.getName() + "' is currently " + station.getOperationalStatus() + " and not accepting bookings.");
         }
 
-        // 2. Fetch and validate Charger
-        Charger charger = chargerRepository.findById(request.getChargerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Charger not found with ID: " + request.getChargerId()));
+        // 2. Fetch and validate Charger with Database-Level Pessimistic Write Lock
+        Charger charger = chargerRepository.findByIdWithPessimisticLock(request.getChargerId())
+                .orElseGet(() -> chargerRepository.findById(request.getChargerId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Charger not found with ID: " + request.getChargerId())));
 
         if (!charger.getStation().getId().equals(station.getId())) {
             throw new BadRequestException("Charger does not belong to the selected station.");
@@ -161,6 +177,16 @@ public class BookingService {
             return bookingRepository.findByStationCompanyIdOrderByStartTimeDesc(user.getCompany().getId()).stream()
                     .map(this::mapBookingToResponse)
                     .collect(Collectors.toList());
+        } else if (user.getRole() == Role.STATION_MANAGER) {
+            List<Long> assignedIds = assignmentRepository != null
+                    ? assignmentRepository.findByUserId(user.getId()).stream().map(a -> a.getStation().getId()).toList()
+                    : List.of();
+            if (assignedIds.isEmpty()) {
+                return List.of();
+            }
+            return bookingRepository.findByStationIdInOrderByStartTimeDesc(assignedIds).stream()
+                    .map(this::mapBookingToResponse)
+                    .collect(Collectors.toList());
         } else {
             return bookingRepository.findAll().stream()
                     .map(this::mapBookingToResponse)
@@ -224,6 +250,14 @@ public class BookingService {
         } else if (user.getRole() == Role.COMPANY_ADMIN) {
             if (user.getCompany() == null || !user.getCompany().getId().equals(booking.getStation().getCompany().getId())) {
                 throw new UnauthorizedException("Unauthorized: Booking belongs to another company's station.");
+            }
+        } else if (user.getRole() == Role.STATION_MANAGER) {
+            if (user.getCompany() == null || !user.getCompany().getId().equals(booking.getStation().getCompany().getId())) {
+                throw new UnauthorizedException("Unauthorized: Booking belongs to another company's station.");
+            }
+            boolean isAssigned = assignmentRepository != null && assignmentRepository.existsByUserIdAndStationId(user.getId(), booking.getStation().getId());
+            if (!isAssigned) {
+                throw new UnauthorizedException("Unauthorized: Booking does not belong to an assigned station.");
             }
         }
     }
