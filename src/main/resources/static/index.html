@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart EV Station Finder, Geofenced Pre-Booking & Billing System</title>
+    <title>Smart EV Station Finder, Geofenced Pre-Booking & Billing Management System</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -11,149 +11,345 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-modern sticky-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="/index.html">
-                <i class="bi bi-ev-station-fill text-success fs-3 me-2"></i>
-                <span>Smart EV Infrastructure</span>
-                <span class="brand-badge">Academic Final Year</span>
+                <span class="brand-logo-icon me-2"><i class="bi bi-lightning-charge-fill"></i></span>
+                <div>
+                    <span class="fw-bold text-white">Smart EV</span>
+                    <span class="text-success fw-normal">Infrastructure</span>
+                </div>
+                <span class="brand-badge d-none d-sm-inline-block">Academic Capstone</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-dismiss="collapse" data-bs-target="#navMenu">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navMenu">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link active" href="/index.html"><i class="bi bi-house"></i> Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/station-search.html"><i class="bi bi-geo-alt"></i> Find Stations</a></li>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    <li class="nav-item"><a class="nav-link active" href="/index.html"><i class="bi bi-house-door me-1"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/station-search.html"><i class="bi bi-geo-alt me-1"></i> Find Stations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#how-it-works"><i class="bi bi-arrow-repeat me-1"></i> How It Works</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#features"><i class="bi bi-stars me-1"></i> Capabilities</a></li>
                 </ul>
-                <div class="d-flex gap-2" id="navAuth">
-                    <a href="/login.html" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-in-right"></i> Log In</a>
-                    <a href="/register.html" class="btn btn-success btn-sm"><i class="bi bi-person-plus"></i> Driver Sign Up</a>
+                <div class="d-flex align-items-center gap-2" id="navAuth">
+                    <a href="/login.html" class="btn btn-outline-light btn-sm px-3"><i class="bi bi-box-arrow-in-right me-1"></i> Log In</a>
+                    <a href="/register.html" class="btn btn-primary btn-sm px-3"><i class="bi bi-person-plus me-1"></i> Register as Driver</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header class="py-5 bg-dark text-white border-bottom position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
-        <div class="container py-4">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <span class="badge bg-success mb-3 px-3 py-2"><i class="bi bi-lightning-charge-fill"></i> Centralized EV Hub & Geofenced Platform</span>
-                    <h1 class="display-5 fw-bold mb-3">Smart EV Station Finder, Geofenced Pre-Booking & Billing Management System</h1>
-                    <p class="lead text-light opacity-75 mb-4">
-                        A robust, multi-tenant Java Spring Boot and MySQL web application for urban and highway electric vehicle infrastructure.
-                        Featuring server-side 30 km Haversine geofenced pre-booking, conflict-safe concurrency locking, simulated charging sessions, and downloadable PDF invoices.
+    <!-- Modern Hero Section -->
+    <header class="hero-banner py-5 py-lg-6 text-white border-bottom">
+        <div class="container py-4 position-relative" style="z-index: 2;">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-7">
+                    <div class="d-inline-flex align-items-center gap-2 badge-tech-pill mb-3">
+                        <i class="bi bi-shield-check text-success"></i>
+                        <span>Centralized Multi-Tenant EV Charging Network &bull; 36 Stations across 14 Cities</span>
+                    </div>
+                    <h1 class="display-4 fw-extrabold mb-3 lh-sm" style="letter-spacing: -0.03em;">
+                        Find, Reserve and Charge Your EV <span style="background: linear-gradient(135deg, #34d399 0%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">with Confidence</span>
+                    </h1>
+                    <p class="lead text-slate-300 opacity-90 mb-4 fw-normal" style="max-width: 620px;">
+                        An intelligent, production-ready EV platform powered by Java 21 Spring Boot and MySQL.
+                        Featuring mathematical <strong>30 km server-side geofencing</strong>, pessimistic database concurrency locking, realistic simulated charging sessions, and automated GST billing.
                     </p>
-                    <div class="d-flex flex-wrap gap-3">
-                        <a href="/station-search.html" class="btn btn-primary btn-lg px-4"><i class="bi bi-search"></i> Interactive Map & Finder</a>
-                        <a href="/login.html" class="btn btn-outline-light btn-lg px-4"><i class="bi bi-person-badge"></i> Role Portals Demo</a>
+
+                    <!-- Prominent Station Search Bar -->
+                    <div class="card border-0 shadow-lg rounded-4 p-2 bg-white text-dark mb-4" style="max-width: 600px;">
+                        <form action="/station-search.html" method="GET" class="d-flex align-items-center p-1">
+                            <span class="ps-2 text-muted"><i class="bi bi-search fs-5 text-success"></i></span>
+                            <input type="text" name="query" class="form-control border-0 shadow-none ps-3 pe-2" placeholder="Search by city (Hyderabad, Chennai, Vijayawada...) or area" style="font-size: 0.95rem;">
+                            <button type="submit" class="btn btn-primary btn-pill px-4 text-nowrap">
+                                <i class="bi bi-search me-1"></i> Find Station
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Quick City Links -->
+                    <div class="d-flex flex-wrap align-items-center gap-2 small text-light opacity-90">
+                        <span class="text-white-50"><i class="bi bi-compass"></i> Popular Cities:</span>
+                        <a href="/station-search.html?query=Hyderabad" class="badge bg-white bg-opacity-10 text-white text-decoration-none px-2 py-1 rounded-pill">Hyderabad (6)</a>
+                        <a href="/station-search.html?query=Chennai" class="badge bg-white bg-opacity-10 text-white text-decoration-none px-2 py-1 rounded-pill">Chennai (5)</a>
+                        <a href="/station-search.html?query=Bangalore" class="badge bg-white bg-opacity-10 text-white text-decoration-none px-2 py-1 rounded-pill">Bangalore (5)</a>
+                        <a href="/station-search.html?query=Vijayawada" class="badge bg-white bg-opacity-10 text-white text-decoration-none px-2 py-1 rounded-pill">Vijayawada (3)</a>
+                        <a href="/station-search.html?query=Visakhapatnam" class="badge bg-white bg-opacity-10 text-white text-decoration-none px-2 py-1 rounded-pill">Visakhapatnam (3)</a>
+                        <a href="/station-search.html?query=Kurnool" class="badge bg-white bg-opacity-10 text-white text-decoration-none px-2 py-1 rounded-pill">Kurnool (3)</a>
                     </div>
                 </div>
-                <div class="col-lg-4 d-none d-lg-block text-center">
-                    <div class="card bg-slate-900 border-secondary text-white p-4 shadow-lg text-start">
-                        <h5 class="text-success"><i class="bi bi-shield-check"></i> System Architecture</h5>
-                        <ul class="list-unstyled small mt-3 mb-0">
-                            <li class="mb-2"><i class="bi bi-check-circle text-info me-2"></i> <strong>Backend:</strong> Java 21, Spring Boot 3.3, Hibernate</li>
-                            <li class="mb-2"><i class="bi bi-check-circle text-info me-2"></i> <strong>Database:</strong> MySQL 8.x (17 relational tables)</li>
-                            <li class="mb-2"><i class="bi bi-check-circle text-info me-2"></i> <strong>Geofencing:</strong> Haversine 30 km server validation</li>
-                            <li class="mb-2"><i class="bi bi-check-circle text-info me-2"></i> <strong>Booking:</strong> Overlap intervals concurrency lock</li>
-                            <li class="mb-2"><i class="bi bi-check-circle text-info me-2"></i> <strong>Billing:</strong> BigDecimal GST calculation + OpenPDF</li>
-                        </ul>
+
+                <div class="col-lg-5 d-none d-lg-block">
+                    <div class="card glass-panel border-0 text-white p-4 shadow-lg text-start" style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div class="d-flex justify-content-between align-items-center pb-3 border-bottom border-secondary border-opacity-50 mb-3">
+                            <div>
+                                <h6 class="fw-bold mb-0 text-white"><i class="bi bi-speedometer2 text-info me-2"></i> Live Grid Status</h6>
+                                <span class="small text-white-50">Real-time CPO operations</span>
+                            </div>
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">100% OPERATIONAL</span>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <div class="bg-black bg-opacity-25 p-3 rounded-3 border border-white border-opacity-10">
+                                    <span class="small text-white-50 d-block">Network Stations</span>
+                                    <h4 class="fw-bold mb-0 text-white">36 Hubs</h4>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-black bg-opacity-25 p-3 rounded-3 border border-white border-opacity-10">
+                                    <span class="small text-white-50 d-block">Live Chargers</span>
+                                    <h4 class="fw-bold mb-0 text-info">121 Guns</h4>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-black bg-opacity-25 p-3 rounded-3 border border-white border-opacity-10">
+                                    <span class="small text-white-50 d-block">CPOs Connected</span>
+                                    <h4 class="fw-bold mb-0 text-warning">3 Operators</h4>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-black bg-opacity-25 p-3 rounded-3 border border-white border-opacity-10">
+                                    <span class="small text-white-50 d-block">Fast DC Power</span>
+                                    <h4 class="fw-bold mb-0 text-success">Up to 150 kW</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="/login.html" class="btn btn-outline-light btn-sm w-100"><i class="bi bi-person-badge me-1"></i> Demo Portals</a>
+                            <a href="/station-search.html" class="btn btn-success btn-sm w-100"><i class="bi bi-map me-1"></i> Explore Map</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Feature Pillars -->
-    <section class="py-5">
-        <div class="container">
+    <!-- Main Features (4 Feature Cards) -->
+    <section class="py-5" id="features">
+        <div class="container py-3">
             <div class="text-center mb-5">
-                <h2 class="fw-bold">Platform Capabilities & Core Modules</h2>
-                <p class="text-muted">Designed for real-world EV operations with multi-company tenant isolation</p>
+                <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-1 rounded-pill mb-2">Platform Capabilities</span>
+                <h2 class="fw-bold" style="letter-spacing: -0.02em;">Designed for Reliable Real-World EV Operations</h2>
+                <p class="text-muted" style="max-width: 600px; margin: 0 auto;">Combining server-side algorithmic geofencing, concurrency control, and deterministic simulation for end-to-end reliability.</p>
             </div>
+
             <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card h-100 stat-card p-4">
+                <!-- Feature 1: Find Nearby Stations -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card stat-card p-4 h-100">
                         <div class="stat-icon bg-primary bg-opacity-10 text-primary mb-3">
-                            <i class="bi bi-map"></i>
+                            <i class="bi bi-geo-alt-fill"></i>
                         </div>
-                        <h5 class="fw-bold">Interactive Discovery & Map</h5>
-                        <p class="text-muted small">Leaflet.js & OpenStreetMap integration with filters for AC/DC chargers, connector types (CCS2, Type 2, CHAdeMO), power kW, occupancy rates, and estimated queue wait time.</p>
+                        <h5 class="fw-bold mb-2">Find Nearby Stations</h5>
+                        <p class="text-muted small mb-0">
+                            Interactive Leaflet and OpenStreetMap discovery with GPS proximity calculations. Filter by city, AC/DC fast chargers, connector standards (CCS2, Type 2, CHAdeMO, GB/T), and minimum power ratings.
+                        </p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card h-100 stat-card p-4">
+
+                <!-- Feature 2: Real-Time Charger Availability -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card stat-card p-4 h-100">
                         <div class="stat-icon bg-success bg-opacity-10 text-success mb-3">
-                            <i class="bi bi-geo"></i>
+                            <i class="bi bi-broadcast"></i>
                         </div>
-                        <h5 class="fw-bold">30 km Software Geofence</h5>
-                        <p class="text-muted small">Server-side mathematical enforcement using the Haversine formula in Java. Pre-booking is verified and rejected if the vehicle is outside the 30 km radius to prevent slot hoarding.</p>
+                        <h5 class="fw-bold mb-2">Real-Time Availability</h5>
+                        <p class="text-muted small mb-0">
+                            Live operational and occupancy tracking for every charger hardware post. Live status updates dynamically differentiate between available guns, active charging sessions, and maintenance outages.
+                        </p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card h-100 stat-card p-4">
+
+                <!-- Feature 3: 30 km Geofenced Booking -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card stat-card p-4 h-100">
                         <div class="stat-icon bg-warning bg-opacity-10 text-warning mb-3">
-                            <i class="bi bi-calendar2-check"></i>
+                            <i class="bi bi-shield-lock-fill"></i>
                         </div>
-                        <h5 class="fw-bold">Conflict-Safe Slot Booking</h5>
-                        <p class="text-muted small">Database transaction isolation evaluating half-open intervals <code>[existingStart, existingEnd)</code>. Zero double-booking guarantee with demo token reservation payments.</p>
+                        <h5 class="fw-bold mb-2">30 km Geofenced Booking</h5>
+                        <p class="text-muted small mb-0">
+                            Server-side mathematical enforcement using the spherical Haversine formula in Java. Pre-booking requests are verified on the backend and rejected if beyond 30 km, stopping fraudulent slot hoarding.
+                        </p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card h-100 stat-card p-4">
+
+                <!-- Feature 4: Smart Billing and Invoices -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card stat-card p-4 h-100">
                         <div class="stat-icon bg-info bg-opacity-10 text-info mb-3">
-                            <i class="bi bi-battery-charging"></i>
+                            <i class="bi bi-receipt-cutoff"></i>
                         </div>
-                        <h5 class="fw-bold">Simulated Charging Sessions</h5>
-                        <p class="text-muted small">Deterministic energy delivery algorithm computing kWh based on charger power kW and elapsed time without physical IoT sensors. Live battery visualizer and state transitions.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card h-100 stat-card p-4">
-                        <div class="stat-icon bg-danger bg-opacity-10 text-danger mb-3">
-                            <i class="bi bi-receipt"></i>
-                        </div>
-                        <h5 class="fw-bold">Tariff & PDF Invoicing</h5>
-                        <p class="text-muted small">Regulated CPO tariff engine with BigDecimal currency computations (Energy Cost + Service Fee + 18% GST). Downloadable authenticated PDF tax receipts powered by OpenPDF.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card h-100 stat-card p-4">
-                        <div class="stat-icon bg-secondary bg-opacity-10 text-dark mb-3">
-                            <i class="bi bi-people"></i>
-                        </div>
-                        <h5 class="fw-bold">4 Role-Based Portals</h5>
-                        <p class="text-muted small">Platform Admin, Company Admin (Tata Power, Zeon), Station Manager, and EV Driver portals with strict backend data isolation preventing cross-company data leakage.</p>
+                        <h5 class="fw-bold mb-2">Smart Billing & Invoices</h5>
+                        <p class="text-muted small mb-0">
+                            Regulated tariff engine with arbitrary-precision BigDecimal financial calculations (Energy Charge + Service Fee + 18% GST). Instant one-click downloadable PDF invoices generated via OpenPDF.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Role Quick Access Callout -->
-    <section class="py-5 bg-light border-top">
+    <!-- Clean "How It Works" Section -->
+    <section class="py-5 bg-white border-top border-bottom" id="how-it-works">
+        <div class="container py-3">
+            <div class="text-center mb-5">
+                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-1 rounded-pill mb-2">Driver Workflow</span>
+                <h2 class="fw-bold" style="letter-spacing: -0.02em;">How It Works</h2>
+                <p class="text-muted">A streamlined 5-step journey from station discovery to digital invoice generation</p>
+            </div>
+
+            <div class="row g-4 align-items-stretch">
+                <!-- Step 1 -->
+                <div class="col-lg col-md-4 col-sm-6">
+                    <div class="process-step-card">
+                        <div class="process-step-badge">1</div>
+                        <h6 class="fw-bold mb-2">Find Station</h6>
+                        <p class="text-muted small mb-0">Search 36 hubs across 14 cities or locate the nearest station via browser GPS coordinates.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="col-lg col-md-4 col-sm-6">
+                    <div class="process-step-card">
+                        <div class="process-step-badge">2</div>
+                        <h6 class="fw-bold mb-2">Check Availability</h6>
+                        <p class="text-muted small mb-0">Inspect connector compatibility, live power kW rating, tariff rate, and estimated wait times.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="col-lg col-md-4 col-sm-6">
+                    <div class="process-step-card">
+                        <div class="process-step-badge">3</div>
+                        <h6 class="fw-bold mb-2">Reserve Slot</h6>
+                        <p class="text-muted small mb-0">Backend checks 30 km geofence and reserves slot with pessimistic locking and demo token hold.</p>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="col-lg col-md-4 col-sm-6">
+                    <div class="process-step-card">
+                        <div class="process-step-badge">4</div>
+                        <h6 class="fw-bold mb-2">Charge Your EV</h6>
+                        <p class="text-muted small mb-0">Activate simulated charging session with deterministic kWh metering and live battery graphics.</p>
+                    </div>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="col-lg col-md-4 col-sm-6">
+                    <div class="process-step-card">
+                        <div class="process-step-badge">5</div>
+                        <h6 class="fw-bold mb-2">Receive Bill</h6>
+                        <p class="text-muted small mb-0">Automatic GST calculation, duplicate-protected billing, and instant downloadable PDF invoice.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Clear Call to Action (CTA) Section -->
+    <section class="py-5 bg-light">
+        <div class="container py-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-dark text-white text-center position-relative overflow-hidden" style="background: linear-gradient(135deg, #090e17 0%, #1e293b 100%);">
+                <div class="position-relative" style="z-index: 2; max-width: 720px; margin: 0 auto;">
+                    <span class="badge bg-success px-3 py-1 rounded-pill mb-3 fw-bold">Ready to Experience Next-Gen EV Infrastructure?</span>
+                    <h2 class="display-6 fw-bold mb-3">Start Exploring Smart EV Platform</h2>
+                    <p class="text-slate-300 opacity-90 mb-4">
+                        Whether you are an EV driver reserving a fast charger, a station manager maintaining hardware, or a CPO administrator analyzing revenue, experience the complete multi-tenant platform.
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="/station-search.html" class="btn btn-primary btn-lg px-4 btn-pill">
+                            <i class="bi bi-geo-alt-fill me-1"></i> Find a Station
+                        </a>
+                        <a href="/register.html" class="btn btn-light btn-lg px-4 btn-pill">
+                            <i class="bi bi-person-plus-fill me-1"></i> Register as a Driver
+                        </a>
+                        <a href="/login.html" class="btn btn-outline-light btn-lg px-4 btn-pill">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Explore the Platform
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Role Quick Access Callout for Evaluators -->
+    <section class="py-4 bg-white border-top">
         <div class="container">
-            <div class="card border-0 shadow-sm p-4">
+            <div class="card border-0 bg-light rounded-4 p-4">
                 <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <h4 class="fw-bold mb-2"><i class="bi bi-key-fill text-primary"></i> Academic Evaluation & Viva Demo Logins</h4>
-                        <p class="text-muted mb-0">Pre-seeded accounts are readily configured for instant presentation without manual registration.</p>
+                    <div class="col-lg-8">
+                        <h5 class="fw-bold mb-1"><i class="bi bi-key-fill text-primary me-2"></i> Academic Evaluation & Viva Demo Logins</h5>
+                        <p class="text-muted small mb-0">
+                            Pre-configured accounts for instant presentation:
+                            <span class="badge bg-secondary">Driver: driver@smartev.com</span>
+                            <span class="badge bg-primary">Tata Admin: tatapower@smartev.com</span>
+                            <span class="badge bg-warning text-dark">Station Manager: manager.bangalore@smartev.com</span>
+                            <span class="badge bg-danger">Platform Admin: admin@smartev.com</span>
+                        </p>
                     </div>
-                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                        <a href="/login.html" class="btn btn-primary"><i class="bi bi-box-arrow-in-right"></i> Open Demo Login Screen</a>
+                    <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                        <a href="/login.html" class="btn btn-outline-primary btn-sm px-3"><i class="bi bi-box-arrow-in-right me-1"></i> Open Demo Login</a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container text-center">
-            <p class="mb-1 fw-bold text-white">Smart EV Station Finder, Geofenced Pre-Booking & Billing Management System</p>
-            <p class="mb-0 text-muted small">A Centralized Web Application for Urban & Highway Electric Vehicle Infrastructure | Final Year B.Tech Project</p>
+    <!-- Modern Footer -->
+    <footer class="modern-footer">
+        <div class="container">
+            <div class="row g-4 pb-4 border-bottom border-secondary border-opacity-25">
+                <div class="col-lg-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="brand-logo-icon me-2"><i class="bi bi-lightning-charge-fill"></i></span>
+                        <span class="fw-bold text-white fs-5">Smart EV Infrastructure</span>
+                    </div>
+                    <p class="small text-slate-400 mb-3" style="max-width: 320px;">
+                        Centralized web platform for urban and highway electric vehicle charging networks with mathematical geofencing and multi-company tenant isolation.
+                    </p>
+                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">Final Year B.Tech Capstone Project</span>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <h6 class="text-white fw-bold small text-uppercase mb-3" style="letter-spacing: 0.05em;">Coverage</h6>
+                    <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
+                        <li><a href="/station-search.html?query=Hyderabad">Hyderabad (6)</a></li>
+                        <li><a href="/station-search.html?query=Chennai">Chennai (5)</a></li>
+                        <li><a href="/station-search.html?query=Bangalore">Bangalore (5)</a></li>
+                        <li><a href="/station-search.html?query=Vijayawada">Vijayawada (3)</a></li>
+                        <li><a href="/station-search.html?query=Visakhapatnam">Visakhapatnam (3)</a></li>
+                        <li><a href="/station-search.html?query=Kurnool">Kurnool (3)</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <h6 class="text-white fw-bold small text-uppercase mb-3" style="letter-spacing: 0.05em;">Tier-2 Hubs</h6>
+                    <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
+                        <li><a href="/station-search.html?query=Tirupati">Tirupati</a></li>
+                        <li><a href="/station-search.html?query=Warangal">Warangal</a></li>
+                        <li><a href="/station-search.html?query=Mysuru">Mysuru</a></li>
+                        <li><a href="/station-search.html?query=Coimbatore">Coimbatore</a></li>
+                        <li><a href="/station-search.html?query=Nellore">Nellore</a></li>
+                        <li><a href="/station-search.html?query=Guntur">Guntur & Rajahmundry</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6 class="text-white fw-bold small text-uppercase mb-3" style="letter-spacing: 0.05em;">Technology Stack</h6>
+                    <div class="d-flex flex-wrap gap-2 small">
+                        <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25">Java 21</span>
+                        <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25">Spring Boot 3.3</span>
+                        <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25">Spring Security (JWT)</span>
+                        <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25">MySQL 8.x</span>
+                        <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25">Hibernate JPA</span>
+                        <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25">Leaflet.js & OSM</span>
+                        <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25">Chart.js</span>
+                        <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25">OpenPDF</span>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center flex-wrap pt-3 small text-slate-500">
+                <span>&copy; 2026 Smart EV Station Finder, Geofenced Pre-Booking & Billing Management System. All rights reserved.</span>
+                <span>Designed for Academic Excellence &amp; Industrial EV Operations</span>
+            </div>
         </div>
     </footer>
 
@@ -165,9 +361,9 @@
         const user = auth.getUser();
         if (user) {
             document.getElementById('navAuth').innerHTML = `
-                <span class="navbar-text text-light me-2"><i class="bi bi-person-circle"></i> ${user.fullName} (${user.role})</span>
-                <button class="btn btn-sm btn-outline-info" onclick="auth.redirectDashboard('${user.role}')"><i class="bi bi-speedometer2"></i> Dashboard</button>
-                <button class="btn btn-sm btn-outline-danger" onclick="auth.logout()"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                <span class="navbar-text text-light me-2 small"><i class="bi bi-person-circle text-success me-1"></i> ${user.fullName} (${user.role})</span>
+                <button class="btn btn-sm btn-outline-info" onclick="auth.redirectDashboard('${user.role}')"><i class="bi bi-speedometer2 me-1"></i> Dashboard</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="auth.logout()"><i class="bi bi-box-arrow-right"></i></button>
             `;
         }
     </script>

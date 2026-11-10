@@ -3,151 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Dashboard - Smart EV System</title>
+    <title>Driver Dashboard - Smart EV Platform</title>
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
 </head>
 <body class="bg-light">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-        <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-modern sticky-top">
+        <div class="container-fluid px-lg-4">
             <a class="navbar-brand d-flex align-items-center" href="/index.html">
-                <i class="bi bi-ev-station-fill text-success fs-3 me-2"></i>
-                <span>Smart EV Infrastructure</span>
+                <span class="brand-logo-icon me-2"><i class="bi bi-lightning-charge-fill"></i></span>
+                <div>
+                    <span class="fw-bold text-white">Smart EV</span>
+                    <span class="text-success fw-normal">Infrastructure</span>
+                </div>
                 <span class="badge bg-success ms-2">Driver Portal</span>
             </a>
             <div class="collapse navbar-collapse" id="navMenu">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link active" href="/driver-dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/station-search.html"><i class="bi bi-geo-alt"></i> Find Stations</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/bookings.html"><i class="bi bi-calendar-check"></i> My Bookings</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/billing.html"><i class="bi bi-receipt"></i> Invoices</a></li>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    <li class="nav-item"><a class="nav-link active" href="/driver-dashboard.html"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/station-search.html"><i class="bi bi-geo-alt me-1"></i> Find Stations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/bookings.html"><i class="bi bi-calendar-check me-1"></i> My Bookings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/billing.html"><i class="bi bi-receipt me-1"></i> Invoices</a></li>
                 </ul>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="navbar-text text-light small" id="navUser">Driver</span>
-                    <button class="btn btn-outline-danger btn-sm" onclick="auth.logout()"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="navbar-text text-light small" id="navUser"><i class="bi bi-person-circle text-success me-1"></i> Driver</span>
+                    <button class="btn btn-outline-danger btn-sm" onclick="auth.logout()"><i class="bi bi-box-arrow-right me-1"></i> Logout</button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="container py-4 main-content">
+    <div class="container-fluid px-lg-4 py-4 main-content">
         <!-- Welcome Banner -->
         <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
+                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-1 rounded-pill mb-1">Centralized EV Hub</span>
                     <h3 class="fw-bold mb-1" id="driverGreeting">Welcome Back!</h3>
-                    <p class="text-muted small mb-0">Electric Mobility Driver Dashboard | Centralized Pre-Booking & Charging Manager</p>
+                    <p class="text-muted small mb-0">Manage pre-booked slots, monitor simulated charging sessions, and access authenticated tax invoices.</p>
                 </div>
-                <div class="d-flex gap-2 mt-3 mt-md-0">
-                    <a href="/station-search.html" class="btn btn-primary"><i class="bi bi-search"></i> Find Nearby Stations</a>
-                    <button class="btn btn-outline-warning" onclick="openComplaintModal()"><i class="bi bi-chat-left-dots"></i> Report Issue</button>
+                <div class="d-flex gap-2">
+                    <a href="/station-search.html" class="btn btn-primary"><i class="bi bi-search me-1"></i> Find Nearby Stations</a>
+                    <button class="btn btn-outline-warning" onclick="openComplaintModal()"><i class="bi bi-chat-left-dots me-1"></i> Report Issue</button>
                 </div>
             </div>
         </div>
 
         <div id="alert-container"></div>
 
-        <!-- Metric Stat Cards -->
+        <!-- Metric KPI Cards -->
         <div class="row g-3 mb-4">
-            <div class="col-md-3 col-6">
+            <div class="col-xl-3 col-md-6 col-6">
                 <div class="card stat-card p-3">
                     <div class="d-flex align-items-center">
                         <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
-                            <i class="bi bi-calendar-check"></i>
+                            <i class="bi bi-calendar-check-fill"></i>
                         </div>
                         <div>
-                            <span class="small text-muted">Total Bookings</span>
-                            <h4 class="fw-bold mb-0" id="statBookings">0</h4>
+                            <span class="small text-muted d-block">Total Bookings</span>
+                            <h4 class="fw-bold mb-0 text-dark" id="statBookings">0</h4>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3 col-6">
+            <div class="col-xl-3 col-md-6 col-6">
                 <div class="card stat-card p-3">
                     <div class="d-flex align-items-center">
                         <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
-                            <i class="bi bi-lightning-charge"></i>
+                            <i class="bi bi-lightning-charge-fill"></i>
                         </div>
                         <div>
-                            <span class="small text-muted">Energy Consumed</span>
-                            <h4 class="fw-bold mb-0" id="statEnergy">0.0 kWh</h4>
+                            <span class="small text-muted d-block">Energy Consumed</span>
+                            <h4 class="fw-bold mb-0 text-success" id="statEnergy">0.0 kWh</h4>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3 col-6">
+            <div class="col-xl-3 col-md-6 col-6">
                 <div class="card stat-card p-3">
                     <div class="d-flex align-items-center">
                         <div class="stat-icon bg-info bg-opacity-10 text-info me-3">
-                            <i class="bi bi-tree"></i>
+                            <i class="bi bi-tree-fill"></i>
                         </div>
                         <div>
-                            <span class="small text-muted">CO₂ Avoided</span>
-                            <h4 class="fw-bold mb-0" id="statCo2">0.0 kg</h4>
+                            <span class="small text-muted d-block">CO₂ Avoided</span>
+                            <h4 class="fw-bold mb-0 text-info" id="statCo2">0.0 kg</h4>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3 col-6">
+            <div class="col-xl-3 col-md-6 col-6">
                 <div class="card stat-card p-3">
                     <div class="d-flex align-items-center">
                         <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
                             <i class="bi bi-currency-rupee"></i>
                         </div>
                         <div>
-                            <span class="small text-muted">Total Spent (Demo)</span>
-                            <h4 class="fw-bold mb-0" id="statExpenditure">₹0.00</h4>
+                            <span class="small text-muted d-block">Total Spent (Demo)</span>
+                            <h4 class="fw-bold mb-0 text-warning" id="statExpenditure">₹0.00</h4>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row g-4">
-            <!-- Left: Registered Vehicles -->
+        <!-- Core Dashboard Cards (2-column layout) -->
+        <div class="row g-4 mb-4">
+            <!-- Active Booking & Charging Status -->
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <!-- Active Charging Session Card -->
+                <div class="card stat-card p-4 mb-4 bg-white" id="chargingStatusCard">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0"><i class="bi bi-car-front text-primary me-2"></i> My Electric Vehicles</h5>
-                        <button class="btn btn-outline-primary btn-sm" onclick="openAddVehicleModal()">
-                            <i class="bi bi-plus-lg"></i> Add Vehicle
-                        </button>
+                        <h5 class="fw-bold mb-0"><i class="bi bi-battery-charging text-success me-2"></i> Live Charging Status</h5>
+                        <span class="badge bg-light text-muted border small" id="sessionStatusBadge">IDLE</span>
                     </div>
 
-                    <div id="vehicleListContainer">
-                        <div class="text-center py-4 text-muted">
-                            <div class="spinner-border spinner-border-sm" role="status"></div> Loading vehicles...
+                    <div id="chargingContentIdle" class="text-center py-3 text-muted">
+                        <i class="bi bi-plug fs-1 text-secondary mb-2 d-block"></i>
+                        <h6 class="fw-bold text-dark mb-1">No Active Charging Session</h6>
+                        <span class="small">Reserve a slot at any station to initiate simulated charging.</span>
+                    </div>
+
+                    <div id="chargingContentActive" class="d-none">
+                        <div class="row align-items-center">
+                            <div class="col-sm-5 text-center mb-3 mb-sm-0">
+                                <div class="battery-container" style="height: 180px; width: 120px;">
+                                    <div class="battery-fill charging-active" id="batteryFillBar" style="height: 45%;"></div>
+                                    <div class="battery-text" id="batteryPercentageText" style="font-size: 1.4rem;">45%</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-7">
+                                <span class="badge bg-success mb-2"><i class="bi bi-lightning-fill"></i> POWER DELIVERING</span>
+                                <h6 class="fw-bold mb-1" id="activeStationName">Station Name</h6>
+                                <p class="text-muted small mb-2" id="activeChargerDetails">60 kW DC Fast Gun</p>
+                                <div class="bg-light p-2 rounded-3 small mb-3">
+                                    <div class="d-flex justify-content-between"><span>Delivered:</span> <strong id="activeEnergyKwh">14.2 kWh</strong></div>
+                                    <div class="d-flex justify-content-between"><span>Session Code:</span> <code id="activeSessionCode">SESS-DEMO</code></div>
+                                </div>
+                                <a href="/charging-session.html" class="btn btn-primary btn-sm w-100">
+                                    <i class="bi bi-display me-1"></i> Open Interactive Session
+                                </a>
+                            </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Active Booking Card -->
+                <div class="card stat-card p-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-2"></i> Active & Upcoming Bookings</h5>
+                        <a href="/bookings.html" class="small text-decoration-none fw-semibold">View All</a>
+                    </div>
+                    <div id="activeBookingContainer">
+                        <div class="text-center py-3 text-muted small">Loading booking schedule...</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: In-App Notifications & Active Session -->
+            <!-- Right Column: Nearby Stations & Favorite Stations -->
             <div class="col-lg-6">
-                <!-- Active Session Banner if any -->
-                <div id="activeSessionCard" class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-dark text-white d-none">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="badge bg-success mb-1">CHARGING IN PROGRESS</span>
-                            <h6 class="fw-bold mb-0" id="activeSessionStation">-</h6>
-                            <small class="text-muted" id="activeSessionCode">-</small>
-                        </div>
-                        <a href="/charging-session.html" class="btn btn-sm btn-info text-dark fw-bold">Open Session</a>
+                <!-- Nearby Stations Card -->
+                <div class="card stat-card p-4 mb-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-geo-alt-fill text-danger me-2"></i> Nearby Stations (30 km Geofenced)</h5>
+                        <a href="/station-search.html" class="small text-decoration-none fw-semibold">Explore All 36</a>
+                    </div>
+                    <div id="nearbyStationsContainer">
+                        <div class="text-center py-3 text-muted small">Loading nearby stations...</div>
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <!-- Recent Bills & Invoices Card -->
+                <div class="card stat-card p-4 bg-white">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0"><i class="bi bi-bell text-warning me-2"></i> In-App Notifications</h5>
+                        <h5 class="fw-bold mb-0"><i class="bi bi-receipt text-info me-2"></i> Recent Invoices & Bills</h5>
+                        <a href="/billing.html" class="small text-decoration-none fw-semibold">All Invoices</a>
+                    </div>
+                    <div id="recentBillsContainer">
+                        <div class="text-center py-3 text-muted small">Loading recent invoices...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Registered Vehicles & Notifications -->
+        <div class="row g-4">
+            <!-- Left: Registered Vehicles -->
+            <div class="col-lg-6">
+                <div class="card stat-card p-4 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-car-front-fill text-primary me-2"></i> My Registered Electric Vehicles</h5>
+                        <button class="btn btn-outline-primary btn-sm" onclick="openAddVehicleModal()">
+                            <i class="bi bi-plus-lg me-1"></i> Add Vehicle
+                        </button>
+                    </div>
+                    <div id="vehicleListContainer">
+                        <div class="text-center py-3 text-muted small">Loading vehicles...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: In-App Notifications -->
+            <div class="col-lg-6">
+                <div class="card stat-card p-4 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-bell-fill text-warning me-2"></i> In-App Notifications</h5>
                         <span class="badge bg-light text-dark border" id="notifBadge">0 unread</span>
                     </div>
-
-                    <div id="notificationsContainer" style="max-height: 320px; overflow-y: auto;">
+                    <div id="notificationsContainer" style="max-height: 280px; overflow-y: auto;">
                         <div class="text-center py-3 text-muted small">Loading notifications...</div>
                     </div>
                 </div>
@@ -158,41 +227,41 @@
     <!-- Add Vehicle Modal -->
     <div class="modal fade" id="vehicleModal" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content">
+            <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Register New Electric Vehicle</h5>
+                    <h5 class="modal-title fw-bold"><i class="bi bi-car-front text-primary me-2"></i> Register Electric Vehicle</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="vehicleForm">
                         <div class="row g-2 mb-3">
                             <div class="col-6">
-                                <label class="form-label small fw-semibold">Make / Brand</label>
-                                <input type="text" id="vMake" class="form-control form-control-sm" placeholder="e.g. Tata" required>
+                                <label class="form-label">Make / Brand</label>
+                                <input type="text" id="vMake" class="form-control" placeholder="e.g. Tata" required>
                             </div>
                             <div class="col-6">
-                                <label class="form-label small fw-semibold">Model</label>
-                                <input type="text" id="vModel" class="form-control form-control-sm" placeholder="e.g. Nexon EV" required>
-                            </div>
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="form-label small fw-semibold">Year</label>
-                                <input type="number" id="vYear" class="form-control form-control-sm" value="2024" required>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label small fw-semibold">License Plate No.</label>
-                                <input type="text" id="vPlate" class="form-control form-control-sm" placeholder="KA-01-EV-1234" required>
+                                <label class="form-label">Model</label>
+                                <input type="text" id="vModel" class="form-control" placeholder="e.g. Nexon EV" required>
                             </div>
                         </div>
                         <div class="row g-2 mb-3">
                             <div class="col-6">
-                                <label class="form-label small fw-semibold">Battery Capacity (kWh)</label>
-                                <input type="number" step="0.1" id="vCapacity" class="form-control form-control-sm" placeholder="40.5" required>
+                                <label class="form-label">Year</label>
+                                <input type="number" id="vYear" class="form-control" value="2024" required>
                             </div>
                             <div class="col-6">
-                                <label class="form-label small fw-semibold">Connector Type</label>
-                                <select id="vConnector" class="form-select form-select-sm" required>
+                                <label class="form-label">License Plate No.</label>
+                                <input type="text" id="vPlate" class="form-control" placeholder="KA-01-EV-1234" required>
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Battery Capacity (kWh)</label>
+                                <input type="number" step="0.1" id="vCapacity" class="form-control" placeholder="40.5" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Connector Type</label>
+                                <select id="vConnector" class="form-select" required>
                                     <option value="CCS2" selected>CCS2 (Combined Fast)</option>
                                     <option value="Type 2">Type 2 (AC Slow/Fast)</option>
                                     <option value="CHAdeMO">CHAdeMO</option>
@@ -200,7 +269,7 @@
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-sm w-100">Save Vehicle</button>
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check2-circle me-1"></i> Save Vehicle</button>
                     </form>
                 </div>
             </div>
@@ -210,36 +279,37 @@
     <!-- Complaint Modal -->
     <div class="modal fade" id="complaintModal" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content">
+            <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Submit Grievance / Complaint</h5>
+                    <h5 class="modal-title fw-bold"><i class="bi bi-chat-left-dots text-warning me-2"></i> Submit Issue / Grievance</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="complaintForm">
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold">Select Charging Company</label>
-                            <select id="compCompanyId" class="form-select form-select-sm" required>
+                            <label class="form-label">Select Charging Company</label>
+                            <select id="compCompanyId" class="form-select" required>
                                 <option value="1">Tata Power EZ Charge</option>
                                 <option value="2">Zeon Electric Charging</option>
                                 <option value="3">Jio-bp pulse</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold">Subject</label>
-                            <input type="text" id="compSubject" class="form-control form-control-sm" placeholder="e.g. Charger failed to release connector" required>
+                            <label class="form-label">Subject</label>
+                            <input type="text" id="compSubject" class="form-control" placeholder="e.g. Connector failed to release gun" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold">Description</label>
-                            <textarea id="compDescription" class="form-control form-control-sm" rows="3" placeholder="Provide details of station, charger identifier, or issue..." required></textarea>
+                            <label class="form-label">Description</label>
+                            <textarea id="compDescription" class="form-control" rows="3" placeholder="Provide details of station, charger identifier, or issue..." required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-warning btn-sm w-100">Submit Complaint</button>
+                        <button type="submit" class="btn btn-warning w-100"><i class="bi bi-send me-1"></i> Submit Complaint</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/api.js"></script>
     <script>
@@ -248,7 +318,7 @@
         async function initDashboard() {
             const user = auth.getUser();
             if (user) {
-                document.getElementById('navUser').innerText = user.fullName;
+                document.getElementById('navUser').innerHTML = `<i class="bi bi-person-circle text-success me-1"></i> ${user.fullName}`;
                 document.getElementById('driverGreeting').innerText = `Welcome, ${user.fullName}!`;
             }
 
@@ -262,23 +332,143 @@
                 document.getElementById('notifBadge').innerText = `${stats.unreadNotifications} unread`;
 
                 // 2. Active Session check
-                try {
-                    const activeSess = await apiFetch('/sessions/active');
-                    if (activeSess) {
-                        document.getElementById('activeSessionCard').classList.remove('d-none');
-                        document.getElementById('activeSessionStation').innerText = activeSess.stationName;
-                        document.getElementById('activeSessionCode').innerText = `${activeSess.sessionCode} (${activeSess.currentBatteryPct}% charged)`;
-                    }
-                } catch (ignored) {}
+                loadActiveSession();
 
-                // 3. Vehicles
+                // 3. Active Bookings
+                loadActiveBookings();
+
+                // 4. Nearby Stations
+                loadNearbyStations();
+
+                // 5. Recent Bills
+                loadRecentBills();
+
+                // 6. Vehicles
                 loadVehicles();
 
-                // 4. Notifications
+                // 7. Notifications
                 loadNotifications();
 
             } catch (err) {
                 showAlert('Failed to load dashboard: ' + err.message, 'danger');
+            }
+        }
+
+        async function loadActiveSession() {
+            try {
+                const activeSess = await apiFetch('/sessions/active');
+                if (activeSess) {
+                    document.getElementById('sessionStatusBadge').innerText = 'CHARGING';
+                    document.getElementById('sessionStatusBadge').className = 'badge bg-success';
+                    document.getElementById('chargingContentIdle').classList.add('d-none');
+                    document.getElementById('chargingContentActive').classList.remove('d-none');
+                    document.getElementById('activeStationName').innerText = activeSess.stationName;
+                    document.getElementById('activeChargerDetails').innerText = `${activeSess.chargerIdentifier} (${activeSess.connectorType})`;
+                    document.getElementById('batteryPercentageText').innerText = `${activeSess.currentBatteryPct}%`;
+                    document.getElementById('batteryFillBar').style.height = `${activeSess.currentBatteryPct}%`;
+                    document.getElementById('activeEnergyKwh').innerText = `${activeSess.energyConsumedKwh.toFixed(1)} kWh`;
+                    document.getElementById('activeSessionCode').innerText = activeSess.sessionCode;
+                }
+            } catch (ignored) {}
+        }
+
+        async function loadActiveBookings() {
+            const container = document.getElementById('activeBookingContainer');
+            try {
+                const bookings = await apiFetch('/bookings/my');
+                if (!bookings || bookings.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-3 text-muted">
+                            <i class="bi bi-calendar-x fs-2 text-secondary d-block mb-1"></i>
+                            <span class="small">No active bookings scheduled. <a href="/station-search.html">Find a station</a> to reserve.</span>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const recent = bookings.slice(0, 3);
+                container.innerHTML = recent.map(b => {
+                    const isUpcoming = b.status === 'CONFIRMED' || b.status === 'PENDING';
+                    const statusBadge = isUpcoming ? 'bg-success' : (b.status === 'COMPLETED' ? 'bg-secondary' : 'bg-danger');
+
+                    return `
+                        <div class="border rounded-3 p-3 mb-2 bg-light">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <div>
+                                    <strong class="text-dark">${b.stationName}</strong>
+                                    <span class="badge ${statusBadge} ms-2" style="font-size: 0.68rem;">${b.status}</span>
+                                </div>
+                                <code class="small fw-bold text-primary">${b.bookingCode}</code>
+                            </div>
+                            <div class="small text-muted mb-2">
+                                <i class="bi bi-clock me-1"></i> ${formatDateTime(b.startTime)} &bull; ${b.chargerIdentifier}
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small text-muted">Hold Fee: <strong>₹${b.bookingFee}</strong></span>
+                                ${isUpcoming ? `<a href="/charging-session.html" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.75rem;"><i class="bi bi-lightning-fill"></i> Start Charging</a>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                container.innerHTML = `<div class="text-danger small">Error loading bookings</div>`;
+            }
+        }
+
+        async function loadNearbyStations() {
+            const container = document.getElementById('nearbyStationsContainer');
+            try {
+                const stations = await apiFetch('/stations?driverLat=12.9716&driverLon=77.5946');
+                if (!stations || stations.length === 0) {
+                    container.innerHTML = `<div class="text-muted small text-center py-2">No stations available</div>`;
+                    return;
+                }
+
+                const topNearby = stations.slice(0, 3);
+                container.innerHTML = topNearby.map(s => `
+                    <div class="border rounded-3 p-2 mb-2 bg-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold small text-dark">${s.name}</div>
+                            <span class="text-muted" style="font-size: 0.72rem;"><i class="bi bi-geo-alt text-danger me-1"></i>${s.city} &bull; <strong class="text-success">${s.availableChargersCount}/${s.operationalChargersCount} Available</strong> &bull; ₹${s.baseTariffPerKwh}/kWh</span>
+                        </div>
+                        <a href="/booking.html?stationId=${s.id}&lat=12.9716&lon=77.5946" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;">
+                            Book
+                        </a>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = `<div class="text-danger small">Error loading nearby stations</div>`;
+            }
+        }
+
+        async function loadRecentBills() {
+            const container = document.getElementById('recentBillsContainer');
+            try {
+                const bills = await apiFetch('/bills/my');
+                if (!bills || bills.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-3 text-muted small">
+                            <i class="bi bi-receipt fs-2 text-secondary d-block mb-1"></i>
+                            No invoices generated yet.
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = bills.slice(0, 3).map(bill => `
+                    <div class="border rounded-3 p-2 mb-2 bg-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong class="small text-dark">${bill.invoiceNumber}</strong>
+                            <span class="badge bg-success bg-opacity-25 text-success ms-1" style="font-size: 0.65rem;">${bill.paymentStatus}</span>
+                            <div class="text-muted" style="font-size: 0.72rem;">${bill.stationName} &bull; <strong>${bill.totalUnitsKwh} kWh</strong> &bull; ${formatCurrency(bill.totalAmount)}</div>
+                        </div>
+                        <a href="/api/bills/${bill.id}/pdf" target="_blank" class="btn btn-sm btn-outline-dark py-0 px-2" style="font-size: 0.75rem;">
+                            <i class="bi bi-file-earmark-pdf text-danger me-1"></i> PDF
+                        </a>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = `<div class="text-danger small">Error loading invoices</div>`;
             }
         }
 
@@ -288,8 +478,8 @@
                 const vehicles = await apiFetch('/vehicles');
                 if (vehicles.length === 0) {
                     container.innerHTML = `
-                        <div class="text-center py-4 text-muted">
-                            <i class="bi bi-car-front fs-2 d-block mb-1"></i>
+                        <div class="text-center py-3 text-muted">
+                            <i class="bi bi-car-front fs-2 d-block mb-1 text-secondary"></i>
                             <span class="small">No vehicles registered yet. Add one to enable fast slot pre-booking.</span>
                         </div>
                     `;
@@ -297,16 +487,16 @@
                 }
 
                 container.innerHTML = vehicles.map(v => `
-                    <div class="card border rounded-3 p-3 mb-2 bg-light">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="fw-bold mb-0">${v.make} ${v.model} (${v.year})</h6>
-                                <span class="small text-muted">${v.licensePlate} | <strong>${v.batteryCapacityKwh} kWh</strong> | Connector: <span class="badge bg-secondary">${v.compatibleConnector}</span></span>
+                    <div class="border rounded-3 p-2 mb-2 bg-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong class="small text-dark">${v.make} ${v.model} (${v.year})</strong>
+                            <div class="small text-muted" style="font-size: 0.75rem;">
+                                ${v.licensePlate} &bull; <strong>${v.batteryCapacityKwh} kWh</strong> &bull; <span class="badge bg-secondary" style="font-size: 0.68rem;">${v.compatibleConnector}</span>
                             </div>
-                            <button class="btn btn-outline-danger btn-sm py-0 px-2" onclick="deleteVehicle(${v.id})">
-                                <i class="bi bi-trash"></i>
-                            </button>
                         </div>
+                        <button class="btn btn-outline-danger btn-sm py-0 px-2" onclick="deleteVehicle(${v.id})" style="font-size: 0.75rem;">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </div>
                 `).join('');
             } catch (err) {
@@ -325,10 +515,10 @@
                 container.innerHTML = notifs.map(n => `
                     <div class="border-bottom py-2 small ${n.isRead ? 'text-muted' : 'fw-semibold'}">
                         <div class="d-flex justify-content-between">
-                            <span class="text-dark">${n.title}</span>
+                            <span class="text-dark"><i class="bi bi-info-circle text-primary me-1"></i>${n.title}</span>
                             <span class="text-muted" style="font-size: 0.7rem;">${formatDateTime(n.createdAt)}</span>
                         </div>
-                        <div class="text-secondary small">${n.message}</div>
+                        <div class="text-secondary small mt-1">${n.message}</div>
                     </div>
                 `).join('');
             } catch (ignored) {}
