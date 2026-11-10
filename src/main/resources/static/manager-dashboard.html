@@ -4,69 +4,158 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Station Manager Hub - Smart EV System</title>
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
 </head>
 <body class="bg-light">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-        <div class="container-fluid px-4">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-modern sticky-top">
+        <div class="container-fluid px-lg-4">
             <a class="navbar-brand d-flex align-items-center" href="/index.html">
-                <i class="bi bi-ev-station-fill text-success fs-3 me-2"></i>
-                <span>Smart EV Infrastructure</span>
+                <span class="brand-logo-icon me-2"><i class="bi bi-lightning-charge-fill"></i></span>
+                <div>
+                    <span class="fw-bold text-white">Smart EV</span>
+                    <span class="text-success fw-normal">Infrastructure</span>
+                </div>
                 <span class="badge bg-warning text-dark ms-2">Station Manager</span>
             </a>
             <div class="d-flex align-items-center gap-3">
-                <span class="navbar-text text-light small" id="mgrTitle">Hub Manager</span>
-                <button class="btn btn-outline-danger btn-sm" onclick="auth.logout()"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                <span class="navbar-text text-light small" id="mgrTitle"><i class="bi bi-person-badge text-warning me-1"></i> Hub Manager</span>
+                <button class="btn btn-outline-danger btn-sm" onclick="auth.logout()"><i class="bi bi-box-arrow-right me-1"></i> Logout</button>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid px-4 py-4 main-content">
-        <!-- Banner -->
+    <div class="container-fluid px-lg-4 py-4 main-content">
+        <!-- Header Banner -->
         <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
+                    <span class="badge bg-warning bg-opacity-25 text-dark fw-bold px-3 py-1 rounded-pill mb-1">
+                        <i class="bi bi-shield-lock-fill text-warning me-1"></i> Role-Scoped Station Access
+                    </span>
                     <h3 class="fw-bold mb-1" id="hubHeading">Station Operational Management Hub</h3>
-                    <p class="text-muted small mb-0">Monitor real-time charger availability, report equipment maintenance, and supervise active sessions</p>
+                    <p class="text-muted small mb-0">Supervise assigned stations, manage charger hardware availability, inspect reservations, and track work orders.</p>
                 </div>
-                <div class="mt-2 mt-md-0">
-                    <button class="btn btn-warning" onclick="openMaintenanceModal()"><i class="bi bi-tools me-1"></i> Log Maintenance Issue</button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-warning" onclick="openMaintenanceModal()">
+                        <i class="bi bi-tools me-1"></i> Log Maintenance Issue
+                    </button>
                 </div>
             </div>
         </div>
 
         <div id="alert-container"></div>
 
+        <!-- Manager KPI Metric Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-md-6 col-6">
+                <div class="card stat-card p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <div>
+                            <span class="small text-muted d-block">Assigned Stations</span>
+                            <h4 class="fw-bold mb-0 text-dark" id="mgrStatStations">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 col-6">
+                <div class="card stat-card p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                            <i class="bi bi-lightning-charge"></i>
+                        </div>
+                        <div>
+                            <span class="small text-muted d-block">Active Chargers</span>
+                            <h4 class="fw-bold mb-0 text-success" id="mgrStatChargers">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 col-6">
+                <div class="card stat-card p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-info bg-opacity-10 text-info me-3">
+                            <i class="bi bi-calendar2-check"></i>
+                        </div>
+                        <div>
+                            <span class="small text-muted d-block">Today's Bookings</span>
+                            <h4 class="fw-bold mb-0 text-info" id="mgrStatBookings">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 col-6">
+                <div class="card stat-card p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3">
+                            <i class="bi bi-wrench"></i>
+                        </div>
+                        <div>
+                            <span class="small text-muted d-block">Open Work Orders</span>
+                            <h4 class="fw-bold mb-0 text-danger" id="mgrStatMaintenance">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-4">
-            <!-- Left: Station Chargers -->
+            <!-- Left: Assigned Stations & Charger Hardware Status -->
             <div class="col-lg-7">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-lightning-charge text-primary me-2"></i> Assigned Chargers & Live Status</h5>
+                <div class="card stat-card p-4 bg-white mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-ev-station text-primary me-2"></i> Assigned Stations &amp; Charger Hardware</h5>
+                        <span class="badge bg-light text-muted border small"><i class="bi bi-lock me-1"></i> Strictly Scoped</span>
+                    </div>
                     <div id="chargersListContainer">
                         <div class="text-center py-4 text-muted">
-                            <div class="spinner-border spinner-border-sm" role="status"></div> Loading chargers...
+                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div> Loading assigned stations...
                         </div>
                     </div>
                 </div>
 
-                <!-- Maintenance Records -->
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-wrench-adjustable text-secondary me-2"></i> Work Orders & Maintenance</h5>
+                <!-- Maintenance Alerts & Work Orders -->
+                <div class="card stat-card p-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-wrench-adjustable text-secondary me-2"></i> Maintenance Alerts &amp; Work Orders</h5>
+                        <button class="btn btn-outline-warning btn-sm" onclick="openMaintenanceModal()"><i class="bi bi-plus-lg me-1"></i> New Issue</button>
+                    </div>
                     <div id="maintenanceContainer">
                         <div class="text-center py-3 text-muted small">Loading maintenance tickets...</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Today's Reservations -->
+            <!-- Right Column: Today's Bookings Queue & Active Sessions -->
             <div class="col-lg-5">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-calendar-event text-success me-2"></i> Today's Reservations & Queue</h5>
+                <!-- Active Charging Sessions -->
+                <div class="card stat-card p-4 mb-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-battery-charging text-success me-2"></i> Active Charging Sessions</h5>
+                        <span class="badge bg-success bg-opacity-10 text-success small">Real-Time</span>
+                    </div>
+                    <div id="activeSessionsContainer">
+                        <div class="text-center py-3 text-muted small">Checking active charging sessions...</div>
+                    </div>
+                </div>
+
+                <!-- Today's Reservations & Queue -->
+                <div class="card stat-card p-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-calendar-event text-primary me-2"></i> Today's Reservations &amp; Queue</h5>
+                        <span class="badge bg-light text-muted border small">Next 24h</span>
+                    </div>
                     <div id="reservationsContainer">
-                        <div class="text-center py-4 text-muted small">Loading reservations...</div>
+                        <div class="text-center py-4 text-muted small">Loading reservations queue...</div>
                     </div>
                 </div>
             </div>
@@ -76,83 +165,115 @@
     <!-- Maintenance Modal -->
     <div class="modal fade" id="maintModal" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content">
+            <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Report Equipment Maintenance</h5>
+                    <h5 class="modal-title fw-bold"><i class="bi bi-tools text-warning me-2"></i> Log Maintenance Issue</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="maintForm">
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold">Target Station ID</label>
-                            <input type="number" id="mStationId" class="form-control form-control-sm" value="1" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Charger ID (Optional)</label>
-                            <input type="number" id="mChargerId" class="form-control form-control-sm" placeholder="Leave blank if station-wide">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Issue Severity</label>
-                            <select id="mPriority" class="form-select form-select-sm">
-                                <option value="LOW">Low - Aesthetic / Informational</option>
-                                <option value="MEDIUM" selected>Medium - Minor Connector Wear</option>
-                                <option value="HIGH">High - Intermittent Power Delivery</option>
-                                <option value="URGENT">Urgent - Complete Failure / Safety Stop</option>
+                            <label class="form-label">Select Assigned Station</label>
+                            <select id="mStationSelect" class="form-select" required>
+                                <option value="" disabled selected>Select station...</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold">Description of Failure</label>
-                            <textarea id="mDesc" class="form-control form-control-sm" rows="3" placeholder="Describe issue observed..." required></textarea>
+                            <label class="form-label">Charger Identifier (Optional)</label>
+                            <input type="number" id="mChargerId" class="form-control" placeholder="Leave empty for general station maintenance">
                         </div>
-                        <button type="submit" class="btn btn-warning btn-sm w-100">Submit Work Order</button>
+                        <div class="mb-3">
+                            <label class="form-label">Issue Severity</label>
+                            <select id="mPriority" class="form-select">
+                                <option value="LOW">Low - Cosmetic / Signage</option>
+                                <option value="MEDIUM" selected>Medium - Minor Connector Latch Wear</option>
+                                <option value="HIGH">High - Power Delivery Intermittent</option>
+                                <option value="URGENT">Urgent - Complete Failure / Safety Emergency</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description of Failure</label>
+                            <textarea id="mDesc" class="form-control" rows="3" placeholder="Describe the physical failure or error code observed..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100"><i class="bi bi-send me-1"></i> Submit Work Order</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/api.js"></script>
     <script>
         auth.checkRoleGuard(['STATION_MANAGER', 'COMPANY_ADMIN', 'PLATFORM_ADMIN']);
 
+        let assignedStationsData = [];
+
         async function initManagerHub() {
             const user = auth.getUser();
             if (user) {
-                document.getElementById('mgrTitle').innerText = `${user.fullName} (${user.role})`;
+                document.getElementById('mgrTitle').innerHTML = `<i class="bi bi-person-badge text-warning me-1"></i> ${user.fullName} (${user.role})`;
             }
 
             try {
                 // Fetch stations & chargers strictly assigned to this manager
-                const allStations = await apiFetch('/stations/manager/assigned');
+                assignedStationsData = await apiFetch('/stations/manager/assigned');
                 const container = document.getElementById('chargersListContainer');
 
-                if (allStations.length === 0) {
-                    container.innerHTML = `<div class="text-muted small">No stations found.</div>`;
+                document.getElementById('mgrStatStations').innerText = assignedStationsData.length;
+
+                // Populate station dropdown for maintenance modal
+                const stationSelect = document.getElementById('mStationSelect');
+                stationSelect.innerHTML = assignedStationsData.map(s => `
+                    <option value="${s.id}">${s.name} (${s.city})</option>
+                `).join('');
+
+                let totalChargersCount = 0;
+                assignedStationsData.forEach(s => {
+                    if (s.chargers) totalChargersCount += s.chargers.length;
+                });
+                document.getElementById('mgrStatChargers').innerText = totalChargersCount;
+
+                if (assignedStationsData.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-slash-circle fs-2 text-secondary d-block mb-2"></i>
+                            <h6 class="fw-bold text-dark">No Stations Assigned</h6>
+                            <span class="small">Contact your Company Admin or Platform Administrator to assign stations to your account.</span>
+                        </div>
+                    `;
                     return;
                 }
 
-                container.innerHTML = allStations.map(st => `
-                    <div class="border rounded-3 p-3 mb-3 bg-light">
-                        <div class="d-flex justify-content-between mb-2">
-                            <strong class="text-dark">${st.name}</strong>
-                            <span class="badge bg-secondary">${st.companyName}</span>
+                container.innerHTML = assignedStationsData.map(st => `
+                    <div class="border rounded-4 p-3 mb-3 bg-light">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong class="text-dark fs-6">${st.name}</strong>
+                                <span class="badge bg-secondary ms-2" style="font-size: 0.7rem;">${st.companyName}</span>
+                            </div>
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">OPERATIONAL</span>
                         </div>
+                        <p class="text-muted small mb-3"><i class="bi bi-geo-alt text-danger me-1"></i> ${st.address}, ${st.city}</p>
+
                         <div class="row g-2">
                             ${st.chargers.map(c => `
                                 <div class="col-md-6">
-                                    <div class="bg-white p-2 border rounded small d-flex justify-content-between align-items-center">
+                                    <div class="bg-white p-3 border rounded-3 small d-flex justify-content-between align-items-center">
                                         <div>
-                                            <strong>${c.chargerIdentifier}</strong>
-                                            <div class="text-muted">${c.chargerType} (${c.connectorType}, ${c.powerRatingKw} kW)</div>
-                                            <span class="badge ${c.operationalStatus === 'OPERATIONAL' ? 'bg-success' : 'bg-danger'}">${c.operationalStatus}</span>
-                                            <span class="badge bg-light text-dark border">${c.availabilityStatus}</span>
+                                            <div class="fw-bold text-dark">${c.chargerIdentifier}</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">${c.chargerType} (${c.connectorType}, <strong>${c.powerRatingKw} kW</strong>)</div>
+                                            <div class="mt-1">
+                                                <span class="badge ${c.operationalStatus === 'OPERATIONAL' ? 'bg-success' : 'bg-danger'}" style="font-size: 0.65rem;">${c.operationalStatus}</span>
+                                                <span class="badge ${c.availabilityStatus === 'AVAILABLE' ? 'bg-light text-success border' : 'bg-warning bg-opacity-25 text-dark'}" style="font-size: 0.65rem;">${c.availabilityStatus}</span>
+                                            </div>
                                         </div>
                                         <div>
-                                            <button class="btn btn-sm ${c.operationalStatus === 'OPERATIONAL' ? 'btn-outline-danger' : 'btn-outline-success'} py-0 px-2"
+                                            <button class="btn btn-sm ${c.operationalStatus === 'OPERATIONAL' ? 'btn-outline-danger' : 'btn-outline-success'} py-1 px-2"
                                                     style="font-size: 0.75rem;"
                                                     onclick="toggleChargerStatus(${c.id}, '${c.operationalStatus === 'OPERATIONAL' ? 'OUT_OF_SERVICE' : 'OPERATIONAL'}')">
-                                                ${c.operationalStatus === 'OPERATIONAL' ? 'Mark Out' : 'Restore'}
+                                                ${c.operationalStatus === 'OPERATIONAL' ? '<i class="bi bi-power"></i> Mark Out' : '<i class="bi bi-check-lg"></i> Restore'}
                                             </button>
                                         </div>
                                     </div>
@@ -163,24 +284,12 @@
                 `).join('');
 
                 // Load Bookings Queue
-                const bookings = await apiFetch('/bookings');
-                const resContainer = document.getElementById('reservationsContainer');
-                if (bookings.length === 0) {
-                    resContainer.innerHTML = `<div class="text-muted small text-center py-3">No active reservations today.</div>`;
-                } else {
-                    resContainer.innerHTML = bookings.slice(0, 8).map(b => `
-                        <div class="border-bottom py-2 small">
-                            <div class="d-flex justify-content-between">
-                                <strong class="text-primary">${b.bookingCode}</strong>
-                                <span class="badge bg-light text-dark border">${b.status}</span>
-                            </div>
-                            <div class="text-dark">${b.driverName} - ${b.stationName}</div>
-                            <div class="text-muted" style="font-size: 0.75rem;">Time: ${formatDateTime(b.startTime)}</div>
-                        </div>
-                    `).join('');
-                }
+                loadBookings();
 
-                // Load Maintenance
+                // Load Active Sessions
+                loadActiveSessions();
+
+                // Load Maintenance Records
                 loadMaintenance();
 
             } catch (err) {
@@ -194,10 +303,66 @@
                     method: 'PATCH',
                     body: JSON.stringify({ operationalStatus: newStatus })
                 });
-                showAlert('Charger status updated.', 'success');
+                showAlert('Charger hardware status updated.', 'success');
                 initManagerHub();
             } catch (err) {
                 showAlert(err.message, 'danger');
+            }
+        }
+
+        async function loadBookings() {
+            const resContainer = document.getElementById('reservationsContainer');
+            try {
+                const bookings = await apiFetch('/bookings');
+                document.getElementById('mgrStatBookings').innerText = bookings.length;
+                if (!bookings || bookings.length === 0) {
+                    resContainer.innerHTML = `<div class="text-muted small text-center py-3">No active reservations today.</div>`;
+                    return;
+                }
+
+                resContainer.innerHTML = bookings.slice(0, 6).map(b => `
+                    <div class="border-bottom py-2 small">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-primary">${b.bookingCode}</strong>
+                            <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">${b.status}</span>
+                        </div>
+                        <div class="text-dark fw-semibold">${b.driverName || 'Driver'} &bull; ${b.stationName}</div>
+                        <div class="text-muted" style="font-size: 0.72rem;"><i class="bi bi-clock me-1"></i> Slot: ${formatDateTime(b.startTime)} (${b.chargerIdentifier})</div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                resContainer.innerHTML = `<div class="text-muted small">No bookings for assigned stations.</div>`;
+            }
+        }
+
+        async function loadActiveSessions() {
+            const container = document.getElementById('activeSessionsContainer');
+            try {
+                const sessions = await apiFetch('/sessions');
+                if (!sessions || sessions.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-3 text-muted small">
+                            <i class="bi bi-broadcast fs-3 text-secondary d-block mb-1"></i>
+                            No vehicle currently drawing power at assigned stations.
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = sessions.map(s => `
+                    <div class="border rounded-3 p-2 mb-2 bg-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong class="text-dark small">${s.stationName}</strong>
+                            <span class="badge bg-success ms-1" style="font-size: 0.65rem;">${s.status}</span>
+                            <div class="text-muted" style="font-size: 0.72rem;">
+                                Charger: <strong>${s.chargerIdentifier}</strong> &bull; Battery: <strong>${s.currentBatteryPct}%</strong> &bull; Energy: <strong>${s.energyConsumedKwh.toFixed(1)} kWh</strong>
+                            </div>
+                        </div>
+                        <code class="small fw-bold text-primary">${s.sessionCode}</code>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = `<div class="text-muted small">No active sessions.</div>`;
             }
         }
 
@@ -205,18 +370,19 @@
             const container = document.getElementById('maintenanceContainer');
             try {
                 const records = await apiFetch('/maintenance');
-                if (records.length === 0) {
-                    container.innerHTML = `<div class="text-muted small text-center py-2">No active work orders.</div>`;
+                document.getElementById('mgrStatMaintenance').innerText = records.length;
+                if (!records || records.length === 0) {
+                    container.innerHTML = `<div class="text-muted small text-center py-2">No active work orders. Hardware is healthy.</div>`;
                     return;
                 }
                 container.innerHTML = records.map(m => `
                     <div class="border-bottom py-2 small">
-                        <div class="d-flex justify-content-between">
-                            <strong>${m.stationName}</strong>
-                            <span class="badge ${m.priority === 'URGENT' ? 'bg-danger' : 'bg-warning text-dark'}">${m.priority}</span>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-dark">${m.stationName}</strong>
+                            <span class="badge ${m.priority === 'URGENT' ? 'bg-danger' : 'bg-warning text-dark'}" style="font-size: 0.65rem;">${m.priority}</span>
                         </div>
-                        <div class="text-dark small">${m.issueDescription}</div>
-                        <div class="text-muted" style="font-size: 0.7rem;">Status: ${m.status} | Reported: ${formatDateTime(m.createdAt)}</div>
+                        <div class="text-secondary small">${m.issueDescription}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-clock me-1"></i> Status: <strong>${m.status}</strong> &bull; Reported: ${formatDateTime(m.createdAt)}</div>
                     </div>
                 `).join('');
             } catch (ignored) {}
@@ -229,7 +395,7 @@
         document.getElementById('maintForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const payload = {
-                stationId: parseInt(document.getElementById('mStationId').value),
+                stationId: parseInt(document.getElementById('mStationSelect').value),
                 chargerId: document.getElementById('mChargerId').value ? parseInt(document.getElementById('mChargerId').value) : null,
                 priority: document.getElementById('mPriority').value,
                 issueDescription: document.getElementById('mDesc').value.trim()
@@ -241,7 +407,7 @@
                     body: JSON.stringify(payload)
                 });
                 bootstrap.Modal.getInstance(document.getElementById('maintModal')).hide();
-                showAlert('Maintenance work order created! Charger marked out of service.', 'success');
+                showAlert('Maintenance work order created! Target charger marked out of service.', 'success');
                 initManagerHub();
             } catch (err) {
                 alert(err.message);

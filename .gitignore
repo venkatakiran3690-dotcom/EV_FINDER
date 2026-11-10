@@ -40,3 +40,4 @@ mysql_data/
 *.pfx
 .m2/repository/
 apache-maven-3.9.9/
+scratch/

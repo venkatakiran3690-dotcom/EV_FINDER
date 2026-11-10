@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find EV Charging Stations - Leaflet Map & Filters</title>
+    <title>Find EV Charging Stations - Leaflet Map & Smart Filters</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -13,86 +13,116 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
-        <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-modern sticky-top">
+        <div class="container-fluid px-lg-4">
             <a class="navbar-brand d-flex align-items-center" href="/index.html">
-                <i class="bi bi-ev-station-fill text-success fs-3 me-2"></i>
-                <span>Smart EV Infrastructure</span>
+                <span class="brand-logo-icon me-2"><i class="bi bi-lightning-charge-fill"></i></span>
+                <div>
+                    <span class="fw-bold text-white">Smart EV</span>
+                    <span class="text-success fw-normal">Infrastructure</span>
+                </div>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navMenu">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="/index.html"><i class="bi bi-house"></i> Home</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/station-search.html"><i class="bi bi-geo-alt"></i> Find Stations</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/driver-dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/bookings.html"><i class="bi bi-calendar-check"></i> My Bookings</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/billing.html"><i class="bi bi-receipt"></i> Invoices</a></li>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    <li class="nav-item"><a class="nav-link" href="/index.html"><i class="bi bi-house-door me-1"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/station-search.html"><i class="bi bi-geo-alt me-1"></i> Find Stations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/driver-dashboard.html"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/bookings.html"><i class="bi bi-calendar-check me-1"></i> My Bookings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/billing.html"><i class="bi bi-receipt me-1"></i> Invoices</a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-2" id="navAuth">
-                    <a href="/login.html" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-in-right"></i> Log In</a>
+                    <a href="/login.html" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-in-right me-1"></i> Log In</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Main Container -->
-    <div class="container-fluid px-lg-4 py-4 main-content">
-        <!-- Driver Location Banner -->
-        <div class="card border-0 shadow-sm mb-4 bg-white">
+    <!-- Main Workspace -->
+    <div class="container-fluid px-lg-4 py-3 main-content">
+        <!-- Interactive Driver Location & Geofence Simulator Bar -->
+        <div class="card border-0 shadow-sm rounded-4 mb-3 bg-white">
             <div class="card-body p-3">
                 <div class="row align-items-center g-3">
-                    <div class="col-md-5">
+                    <div class="col-xl-5 col-lg-4">
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-primary p-2 me-2"><i class="bi bi-crosshair fs-5"></i></span>
+                            <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+                                <i class="bi bi-crosshair"></i>
+                            </div>
                             <div>
-                                <h6 class="mb-0 fw-bold">Test Driver Location (For 30 km Geofence Demo)</h6>
+                                <h6 class="mb-0 fw-bold">Test Driver Location (30 km Geofence Simulator)</h6>
                                 <span class="small text-muted" id="locStatus">Currently set to: Bangalore Central (12.9716, 77.5946)</span>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-xl-5 col-lg-5">
                         <div class="input-group input-group-sm">
-                            <span class="input-group-text"><i class="bi bi-geo-fill text-danger"></i> Preset</span>
+                            <span class="input-group-text bg-light fw-semibold"><i class="bi bi-geo-fill text-danger me-1"></i> City Presets</span>
                             <select id="presetLocation" class="form-select" onchange="changePresetLocation()">
                                 <option value="12.9716,77.5946" selected>Bangalore Central (MG Road)</option>
-                                <option value="12.9784,77.6408">Indiranagar (Near Hub 1)</option>
-                                <option value="12.8452,77.6602">Electronic City Expressway</option>
-                                <option value="12.9863,77.7381">Whitefield IT Corridor</option>
-                                <option value="12.2958,76.6394">Mysore (> 130 km away - Geofence Fail Test)</option>
+                                <option value="17.4504,78.3808">Hyderabad (Hitec City / Cyber Towers)</option>
+                                <option value="12.9010,80.2279">Chennai (OMR IT Expressway / Sholinganallur)</option>
+                                <option value="16.5002,80.6480">Vijayawada (Benz Circle / MG Road)</option>
+                                <option value="17.7215,83.3150">Visakhapatnam (Siripuram VIP Road)</option>
+                                <option value="15.8050,78.0210">Kurnool (NH 44 Highway Bypass)</option>
+                                <option value="13.6350,79.4020">Tirupati (Alipiri Toll Gate)</option>
+                                <option value="12.3052,76.6552">Mysuru (Palace Outer Ring Road)</option>
+                                <option value="11.0168,76.9672">Coimbatore (Gandhipuram Central)</option>
+                                <option value="18.0020,79.5780">Warangal (Subedari / Kazipet)</option>
+                                <option value="28.6139,77.2090">New Delhi (> 1,700 km away - Geofence Block Test)</option>
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-3 text-md-end">
-                        <button class="btn btn-outline-primary btn-sm" onclick="useBrowserGps()">
-                            <i class="bi bi-compass"></i> Use My GPS
+                    <div class="col-xl-2 col-lg-3 text-lg-end">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="useBrowserGps()">
+                            <i class="bi bi-compass me-1"></i> Use My GPS
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row g-4">
-            <!-- Left Side: Filters and Station List -->
-            <div class="col-lg-5">
-                <div class="card border-0 shadow-sm mb-3">
+        <div class="row g-3">
+            <!-- Left Panel: Search, Multi-Criteria Filters & Station Cards List -->
+            <div class="col-lg-5 col-xl-5">
+                <div class="card border-0 shadow-sm rounded-4 mb-3 bg-white">
                     <div class="card-body p-3">
+                        <!-- Search Input -->
                         <div class="input-group mb-2">
                             <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
-                            <input type="text" id="searchQuery" class="form-control" placeholder="Search by name, city, area..." oninput="debounceSearch()">
+                            <input type="text" id="searchQuery" class="form-control" placeholder="Search by name, address, area, or city..." oninput="debounceSearch()">
                         </div>
 
                         <!-- Multi-criteria Filters -->
                         <div class="row g-2">
-                            <div class="col-4">
-                                <select id="filterType" class="form-select form-select-sm" onchange="fetchStations()">
-                                    <option value="ALL">All Types (AC/DC)</option>
-                                    <option value="DC">DC Fast Only</option>
-                                    <option value="AC">AC Level 2 Only</option>
+                            <div class="col-sm-3 col-6">
+                                <select id="filterCity" class="form-select form-select-sm" onchange="applyFilters()">
+                                    <option value="ALL">All Cities (14)</option>
+                                    <option value="Hyderabad">Hyderabad</option>
+                                    <option value="Chennai">Chennai</option>
+                                    <option value="Bangalore">Bangalore</option>
+                                    <option value="Vijayawada">Vijayawada</option>
+                                    <option value="Visakhapatnam">Visakhapatnam</option>
+                                    <option value="Kurnool">Kurnool</option>
+                                    <option value="Tirupati">Tirupati</option>
+                                    <option value="Mysuru">Mysuru</option>
+                                    <option value="Coimbatore">Coimbatore</option>
+                                    <option value="Warangal">Warangal</option>
+                                    <option value="Nellore">Nellore</option>
+                                    <option value="Guntur">Guntur</option>
+                                    <option value="Rajahmundry">Rajahmundry</option>
                                 </select>
                             </div>
-                            <div class="col-4">
+                            <div class="col-sm-3 col-6">
+                                <select id="filterType" class="form-select form-select-sm" onchange="fetchStations()">
+                                    <option value="ALL">All Types</option>
+                                    <option value="DC">DC Fast Only</option>
+                                    <option value="AC">AC Level 2</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3 col-6">
                                 <select id="filterConnector" class="form-select form-select-sm" onchange="fetchStations()">
                                     <option value="ALL">All Connectors</option>
                                     <option value="CCS2">CCS2</option>
@@ -101,38 +131,41 @@
                                     <option value="GB/T">GB/T</option>
                                 </select>
                             </div>
-                            <div class="col-4">
+                            <div class="col-sm-3 col-6">
                                 <select id="filterMinPower" class="form-select form-select-sm" onchange="fetchStations()">
-                                    <option value="0">Any Power (kW)</option>
+                                    <option value="0">Any Power</option>
                                     <option value="22">≥ 22 kW</option>
-                                    <option value="50">≥ 50 kW (Fast)</option>
-                                    <option value="100">≥ 100 kW (Ultra)</option>
+                                    <option value="50">≥ 50 kW Fast</option>
+                                    <option value="100">≥ 100 kW Ultra</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Station Cards List -->
+                <!-- Station Cards Header -->
                 <div class="d-flex justify-content-between align-items-center mb-2 px-1">
-                    <span class="small fw-bold text-muted" id="stationCount">Loading charging stations...</span>
-                    <span class="badge bg-light text-dark border small"><i class="bi bi-sort-down"></i> Sorted by distance</span>
+                    <span class="small fw-bold text-dark" id="stationCount">Loading charging stations...</span>
+                    <span class="badge bg-white text-muted border small"><i class="bi bi-sort-down text-primary me-1"></i> Sorted by distance</span>
                 </div>
 
-                <div id="stationListContainer" style="max-height: 580px; overflow-y: auto;">
-                    <!-- Injected dynamically -->
+                <!-- Station Cards Scroll Container -->
+                <div id="stationListContainer" style="max-height: calc(100vh - 280px); min-height: 480px; overflow-y: auto; padding-right: 4px;">
+                    <!-- Rendered dynamically -->
                 </div>
             </div>
 
-            <!-- Right Side: Leaflet.js Interactive Map -->
-            <div class="col-lg-7">
-                <div class="card border-0 shadow-sm p-2 bg-white">
+            <!-- Right Panel: Interactive Leaflet Map -->
+            <div class="col-lg-7 col-xl-7">
+                <div class="card border-0 shadow-sm rounded-4 p-2 bg-white h-100">
                     <div id="map"></div>
-                    <div class="card-footer bg-white border-0 pt-2 pb-1 small d-flex justify-content-between flex-wrap text-muted">
-                        <span><i class="bi bi-circle-fill text-success"></i> Available Charger</span>
-                        <span><i class="bi bi-circle-fill text-danger"></i> Occupied / Queue</span>
-                        <span><i class="bi bi-circle-fill text-secondary"></i> Out of Service</span>
-                        <span><i class="bi bi-geo-alt-fill text-primary"></i> Driver GPS Location</span>
+                    <div class="card-footer bg-white border-0 pt-2 pb-1 small d-flex justify-content-between align-items-center flex-wrap gap-2 text-muted">
+                        <div class="d-flex align-items-center gap-3">
+                            <span><i class="bi bi-circle-fill text-success me-1"></i> Available</span>
+                            <span><i class="bi bi-circle-fill text-danger me-1"></i> Occupied / Busy</span>
+                            <span><i class="bi bi-geo-alt-fill text-primary me-1"></i> Driver GPS Location</span>
+                        </div>
+                        <span class="badge bg-light text-dark border"><i class="bi bi-shield-check text-success me-1"></i> 30 km Server-Enforced Geofence</span>
                     </div>
                 </div>
             </div>
@@ -150,16 +183,19 @@
         let driverMarker = null;
         let currentDriverLat = 12.9716;
         let currentDriverLon = 77.5946;
-        let stationsData = [];
+        let allStationsData = [];
+        let filteredStations = [];
         let searchTimer = null;
 
         // Init Map
         function initMap() {
-            map = L.map('map').setView([currentDriverLat, currentDriverLon], 12);
+            map = L.map('map', {
+                zoomControl: true
+            }).setView([currentDriverLat, currentDriverLon], 12);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
-                attribution: '&copy; OpenStreetMap contributors | Smart EV System'
+                attribution: '&copy; OpenStreetMap contributors | Smart EV Charging System'
             }).addTo(map);
 
             markersLayer.addTo(map);
@@ -171,22 +207,33 @@
                 map.removeLayer(driverMarker);
             }
             driverMarker = L.circleMarker([currentDriverLat, currentDriverLon], {
-                radius: 9,
-                color: '#0d6efd',
-                fillColor: '#3b82f6',
-                fillOpacity: 0.9,
+                radius: 10,
+                color: '#ffffff',
+                fillColor: '#0284c7',
+                fillOpacity: 1,
                 weight: 3
             }).addTo(map);
-            driverMarker.bindPopup("<b>Your Location (Test Driver)</b><br>Used for 30 km geofence audit.").openPopup();
+            driverMarker.bindPopup("<b>Your Driver Location</b><br>Used for 30 km server geofencing verification.").openPopup();
         }
 
         function changePresetLocation() {
             const val = document.getElementById('presetLocation').value.split(',');
             currentDriverLat = parseFloat(val[0]);
             currentDriverLon = parseFloat(val[1]);
-            document.getElementById('locStatus').innerText = `Currently set to: ${currentDriverLat.toFixed(4)}, ${currentDriverLon.toFixed(4)}`;
+            const selectEl = document.getElementById('presetLocation');
+            const cityName = selectEl.options[selectEl.selectedIndex].text.split('(')[0].trim();
+            document.getElementById('locStatus').innerText = `Location set to: ${cityName} (${currentDriverLat.toFixed(4)}, ${currentDriverLon.toFixed(4)})`;
+
+            // If a specific city preset was selected, auto-switch city filter as well
+            const cityMatch = ["Hyderabad", "Chennai", "Bangalore", "Vijayawada", "Visakhapatnam", "Kurnool", "Tirupati", "Mysuru", "Coimbatore", "Warangal"].find(c => cityName.includes(c));
+            if (cityMatch) {
+                document.getElementById('filterCity').value = cityMatch;
+            } else {
+                document.getElementById('filterCity').value = 'ALL';
+            }
+
             updateDriverMarker();
-            map.panTo([currentDriverLat, currentDriverLon]);
+            map.flyTo([currentDriverLat, currentDriverLon], 12, { duration: 1.2 });
             fetchStations();
         }
 
@@ -200,7 +247,7 @@
                 currentDriverLon = pos.coords.longitude;
                 document.getElementById('locStatus').innerText = `Using Browser GPS: ${currentDriverLat.toFixed(4)}, ${currentDriverLon.toFixed(4)}`;
                 updateDriverMarker();
-                map.setView([currentDriverLat, currentDriverLon], 13);
+                map.flyTo([currentDriverLat, currentDriverLon], 13);
                 fetchStations();
             }, (err) => {
                 alert('GPS Error: ' + err.message);
@@ -223,27 +270,40 @@
             if (minPower && minPower > 0) params.append('minPower', minPower);
 
             try {
-                stationsData = await apiFetch(`/stations?${params.toString()}`);
-                renderStationList(stationsData);
-                renderMapMarkers(stationsData);
+                allStationsData = await apiFetch(`/stations?${params.toString()}`);
+                applyFilters();
             } catch (err) {
                 console.error('Failed to load stations:', err);
                 document.getElementById('stationListContainer').innerHTML = `
-                    <div class="alert alert-danger">Error loading stations: ${err.message}</div>
+                    <div class="alert alert-danger rounded-3 p-3">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Error loading stations: ${err.message}
+                    </div>
                 `;
             }
         }
 
+        function applyFilters() {
+            const cityFilter = document.getElementById('filterCity').value;
+            if (cityFilter === 'ALL') {
+                filteredStations = allStationsData;
+            } else {
+                filteredStations = allStationsData.filter(s => s.city && s.city.toLowerCase() === cityFilter.toLowerCase());
+            }
+
+            renderStationList(filteredStations);
+            renderMapMarkers(filteredStations);
+        }
+
         function renderStationList(stations) {
             const container = document.getElementById('stationListContainer');
-            document.getElementById('stationCount').innerText = `${stations.length} charging stations found`;
+            document.getElementById('stationCount').innerText = `${stations.length} charging station${stations.length === 1 ? '' : 's'} available`;
 
             if (stations.length === 0) {
                 container.innerHTML = `
-                    <div class="card border-0 p-4 text-center text-muted">
-                        <i class="bi bi-ev-station fs-1 text-secondary mb-2"></i>
-                        <h6>No stations match your selected filters</h6>
-                        <span class="small">Try adjusting connector type or minimum power kW.</span>
+                    <div class="card border-0 rounded-4 p-5 text-center text-muted bg-white">
+                        <i class="bi bi-ev-station fs-1 text-secondary mb-3"></i>
+                        <h6 class="fw-bold text-dark">No stations found for this criteria</h6>
+                        <span class="small">Try clearing city, connector filters, or minimum power ratings.</span>
                     </div>
                 `;
                 return;
@@ -252,56 +312,57 @@
             container.innerHTML = stations.map(station => {
                 const isWithinGeofence = station.distanceKm !== null && station.distanceKm <= 30.0;
                 const distanceBadge = station.distanceKm !== null
-                    ? `<span class="badge ${isWithinGeofence ? 'bg-primary' : 'bg-danger'}">${station.distanceKm.toFixed(1)} km away</span>`
+                    ? `<span class="badge ${isWithinGeofence ? 'bg-primary' : 'bg-danger'} rounded-pill px-2 py-1"><i class="bi bi-geo-alt me-1"></i>${station.distanceKm.toFixed(1)} km</span>`
                     : '';
 
                 const geofenceNotice = isWithinGeofence
-                    ? `<span class="text-success small fw-semibold"><i class="bi bi-check-circle"></i> Within 30 km Geofence</span>`
-                    : `<span class="text-danger small fw-semibold"><i class="bi bi-exclamation-triangle"></i> Beyond 30 km Geofence (Booking blocked)</span>`;
+                    ? `<span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Within 30 km Geofence</span>`
+                    : `<span class="text-danger small fw-semibold"><i class="bi bi-slash-circle-fill me-1"></i>Beyond 30 km (Booking Blocked)</span>`;
+
+                const companyLogoClass = station.companyName.includes('Tata') ? 'text-primary' :
+                                         station.companyName.includes('Zeon') ? 'text-success' : 'text-warning';
 
                 return `
-                    <div class="card border-0 shadow-sm mb-3 stat-card" id="card-station-${station.id}">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-start mb-1">
-                                <div>
-                                    <span class="badge bg-secondary mb-1" style="font-size: 0.65rem;">${station.companyName}</span>
-                                    <h6 class="fw-bold mb-0 text-dark">${station.name}</h6>
-                                </div>
-                                ${distanceBadge}
+                    <div class="card stat-card p-3 mb-3" id="card-station-${station.id}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <span class="badge bg-light text-dark border me-1" style="font-size: 0.7rem;"><i class="bi bi-building ${companyLogoClass} me-1"></i>${station.companyName}</span>
+                                <h6 class="fw-bold mb-0 mt-1 text-dark">${station.name}</h6>
                             </div>
-                            <p class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> ${station.address}, ${station.city}</p>
+                            ${distanceBadge}
+                        </div>
+                        <p class="text-muted small mb-2"><i class="bi bi-pin-map me-1 text-danger"></i> ${station.address}, <strong>${station.city}</strong></p>
 
-                            <!-- Metrics Bar -->
-                            <div class="bg-light p-2 rounded-3 mb-2 small d-flex justify-content-between">
-                                <div>
-                                    <span class="text-muted">Available:</span>
-                                    <strong class="text-success">${station.availableChargersCount} / ${station.operationalChargersCount}</strong>
-                                </div>
-                                <div>
-                                    <span class="text-muted">Occupancy:</span>
-                                    <strong>${station.occupancyPercentage}%</strong>
-                                </div>
-                                <div>
-                                    <span class="text-muted">Est. Wait:</span>
-                                    <strong>${station.estimatedWaitMinutes} min</strong>
-                                </div>
-                                <div>
-                                    <span class="text-muted">Rating:</span>
-                                    <strong class="text-warning"><i class="bi bi-star-fill"></i> ${station.averageRating > 0 ? station.averageRating.toFixed(1) : 'New'}</strong>
-                                </div>
+                        <!-- Metrics Grid -->
+                        <div class="bg-light p-2 rounded-3 mb-2 small d-flex justify-content-between align-items-center text-center">
+                            <div>
+                                <span class="text-muted d-block" style="font-size: 0.7rem;">AVAILABLE</span>
+                                <strong class="text-success">${station.availableChargersCount} / ${station.operationalChargersCount}</strong>
                             </div>
+                            <div class="border-start ps-2">
+                                <span class="text-muted d-block" style="font-size: 0.7rem;">OCCUPANCY</span>
+                                <strong>${station.occupancyPercentage}%</strong>
+                            </div>
+                            <div class="border-start ps-2">
+                                <span class="text-muted d-block" style="font-size: 0.7rem;">EST. WAIT</span>
+                                <strong>${station.estimatedWaitMinutes} min</strong>
+                            </div>
+                            <div class="border-start ps-2">
+                                <span class="text-muted d-block" style="font-size: 0.7rem;">RATING</span>
+                                <strong class="text-warning"><i class="bi bi-star-fill"></i> ${station.averageRating > 0 ? station.averageRating.toFixed(1) : '5.0'}</strong>
+                            </div>
+                        </div>
 
-                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                <div>
-                                    ${geofenceNotice}
-                                    <div class="small text-muted">Tariff: ₹${station.baseTariffPerKwh}/kWh</div>
-                                </div>
-                                <div>
-                                    <a href="/booking.html?stationId=${station.id}&lat=${currentDriverLat}&lon=${currentDriverLon}"
-                                       class="btn btn-sm ${isWithinGeofence ? 'btn-success' : 'btn-secondary disabled'}">
-                                       <i class="bi bi-lightning-charge"></i> Pre-Book Slot
-                                    </a>
-                                </div>
+                        <div class="d-flex justify-content-between align-items-center mt-2 pt-1 border-top">
+                            <div>
+                                ${geofenceNotice}
+                                <div class="small text-muted">Tariff: <strong>₹${station.baseTariffPerKwh}/kWh</strong></div>
+                            </div>
+                            <div>
+                                <a href="/booking.html?stationId=${station.id}&lat=${currentDriverLat}&lon=${currentDriverLon}"
+                                   class="btn btn-sm ${isWithinGeofence ? 'btn-primary' : 'btn-secondary disabled'}">
+                                   <i class="bi bi-lightning-charge me-1"></i> Pre-Book Slot
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -313,27 +374,29 @@
             markersLayer.clearLayers();
 
             stations.forEach(station => {
-                const markerColor = station.availableChargersCount > 0 ? '#10b981' : '#ef4444';
+                const isAvailable = station.availableChargersCount > 0;
+                const markerColor = isAvailable ? '#10b981' : '#e11d48';
+
                 const marker = L.circleMarker([station.latitude, station.longitude], {
-                    radius: 8,
+                    radius: 9,
                     color: '#ffffff',
                     fillColor: markerColor,
-                    fillOpacity: 0.9,
+                    fillOpacity: 0.95,
                     weight: 2
                 });
 
                 const popupHtml = `
-                    <div style="min-width: 200px;">
-                        <span class="badge bg-secondary" style="font-size: 0.65rem;">${station.companyName}</span>
-                        <h6 class="fw-bold mb-1">${station.name}</h6>
-                        <p class="text-muted small mb-2">${station.address}</p>
-                        <div class="small mb-2">
-                            <strong>${station.availableChargersCount} of ${station.operationalChargersCount}</strong> chargers available<br>
-                            Occupancy: <strong>${station.occupancyPercentage}%</strong><br>
-                            Approx. Distance: <strong>${station.distanceKm ? station.distanceKm.toFixed(1) + ' km' : 'N/A'}</strong>
+                    <div style="min-width: 220px;">
+                        <span class="badge bg-light text-dark border mb-1" style="font-size: 0.7rem;">${station.companyName}</span>
+                        <h6 class="fw-bold mb-1 text-dark">${station.name}</h6>
+                        <p class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> ${station.address}, ${station.city}</p>
+                        <div class="bg-light p-2 rounded mb-2 small">
+                            <div>Availability: <strong class="${isAvailable ? 'text-success' : 'text-danger'}">${station.availableChargersCount} of ${station.operationalChargersCount} Available</strong></div>
+                            <div>Occupancy: <strong>${station.occupancyPercentage}%</strong></div>
+                            <div>Approx. Distance: <strong>${station.distanceKm ? station.distanceKm.toFixed(1) + ' km' : 'N/A'}</strong></div>
                         </div>
                         <a href="/booking.html?stationId=${station.id}&lat=${currentDriverLat}&lon=${currentDriverLon}"
-                           class="btn btn-primary btn-sm w-100 text-white">Pre-Book Slot</a>
+                           class="btn btn-primary btn-sm w-100 text-white"><i class="bi bi-lightning-charge me-1"></i>Pre-Book Slot</a>
                     </div>
                 `;
 
@@ -344,19 +407,44 @@
 
         function debounceSearch() {
             clearTimeout(searchTimer);
-            searchTimer = setTimeout(fetchStations, 350);
+            searchTimer = setTimeout(fetchStations, 300);
         }
 
-        // Bootstrap on Load
+        // On Load
         document.addEventListener('DOMContentLoaded', () => {
             initMap();
+
+            // Check URL parameters for preset queries (e.g. ?query=Hyderabad)
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryParam = urlParams.get('query');
+            if (queryParam) {
+                document.getElementById('searchQuery').value = queryParam;
+                const cityMatch = ["Hyderabad", "Chennai", "Bangalore", "Vijayawada", "Visakhapatnam", "Kurnool", "Tirupati", "Mysuru", "Coimbatore", "Warangal"].find(c => c.toLowerCase() === queryParam.toLowerCase());
+                if (cityMatch) {
+                    document.getElementById('filterCity').value = cityMatch;
+                    // Also center on that city's preset if available
+                    const presetSelect = document.getElementById('presetLocation');
+                    for (let opt of presetSelect.options) {
+                        if (opt.text.toLowerCase().includes(cityMatch.toLowerCase())) {
+                            presetSelect.value = opt.value;
+                            const coords = opt.value.split(',');
+                            currentDriverLat = parseFloat(coords[0]);
+                            currentDriverLon = parseFloat(coords[1]);
+                            updateDriverMarker();
+                            map.setView([currentDriverLat, currentDriverLon], 12);
+                            break;
+                        }
+                    }
+                }
+            }
+
             fetchStations();
 
             // Navbar User State
             const user = auth.getUser();
             if (user) {
                 document.getElementById('navAuth').innerHTML = `
-                    <span class="navbar-text text-light me-2 small"><i class="bi bi-person-circle"></i> ${user.fullName}</span>
+                    <span class="navbar-text text-light me-2 small"><i class="bi bi-person-circle text-success me-1"></i> ${user.fullName}</span>
                     <button class="btn btn-sm btn-outline-danger" onclick="auth.logout()"><i class="bi bi-box-arrow-right"></i></button>
                 `;
             }
