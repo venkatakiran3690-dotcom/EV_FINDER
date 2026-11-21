@@ -20,9 +20,12 @@
                 </div>
                 <span class="badge bg-danger ms-2">Platform Master Admin</span>
             </a>
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
                 <span class="navbar-text text-light small" id="adminTitle"><i class="bi bi-shield-check text-danger me-1"></i> Platform Admin</span>
                 <button class="btn btn-outline-danger btn-sm" onclick="auth.logout()"><i class="bi bi-box-arrow-right me-1"></i> Logout</button>
+                <button class="btn btn-outline-light btn-sm btn-theme-toggle" id="themeToggleBtn" onclick="theme.toggle()" title="Toggle Dark/Light Theme" aria-label="Toggle Dark/Light Theme">
+                    <i class="bi bi-moon-stars-fill"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -303,15 +306,16 @@
         auth.checkRoleGuard(['PLATFORM_ADMIN']);
 
         async function initPlatformAdmin() {
+            theme.init();
             try {
-                // 1. Stats
+                // 1. Stats with smooth animated counters
                 const stats = await apiFetch('/dashboard/admin');
-                document.getElementById('pStatDrivers').innerText = stats.totalDrivers;
-                document.getElementById('pStatCompanies').innerText = stats.totalCompanies;
-                document.getElementById('pStatStations').innerText = stats.totalStations;
-                document.getElementById('pStatChargers').innerText = stats.totalChargers;
-                document.getElementById('pStatBookings').innerText = stats.totalBookings;
-                document.getElementById('pStatRevenue').innerText = formatCurrency(stats.totalRevenue);
+                animateCounter('pStatDrivers', stats.totalDrivers, 1000);
+                animateCounter('pStatCompanies', stats.totalCompanies, 1000);
+                animateCounter('pStatStations', stats.totalStations, 1200);
+                animateCounter('pStatChargers', stats.totalChargers, 1200);
+                animateCounter('pStatBookings', stats.totalBookings, 1200);
+                animateCounter('pStatRevenue', stats.totalRevenue, 1400, '₹', '', 2);
 
                 // 2. Load Companies
                 loadCompanies();

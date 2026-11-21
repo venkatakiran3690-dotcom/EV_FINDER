@@ -20,4 +20,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT r FROM Review r WHERE r.station.company.id = :companyId ORDER BY r.createdAt DESC")
     List<Review> findByCompanyId(@Param("companyId") Long companyId);
+
+    long countByStationId(Long stationId);
+
+    boolean existsByStationIdAndDriverId(Long stationId, Long driverId);
 }

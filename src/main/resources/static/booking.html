@@ -19,9 +19,12 @@
                     <span class="text-success fw-normal">Infrastructure</span>
                 </div>
             </a>
-            <div class="d-flex gap-2">
+            <div class="d-flex align-items-center gap-2">
                 <a href="/station-search.html" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left me-1"></i> Station Map</a>
                 <a href="/driver-dashboard.html" class="btn btn-outline-info btn-sm"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+                <button class="btn btn-outline-light btn-sm btn-theme-toggle" id="themeToggleBtn" onclick="theme.toggle()" title="Toggle Dark/Light Theme" aria-label="Toggle Dark/Light Theme">
+                    <i class="bi bi-moon-stars-fill"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -30,14 +33,30 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
                             <span class="badge bg-primary mb-1">Slot Pre-Booking</span>
                             <h3 class="fw-bold mb-1" id="stationName">Loading Station Details...</h3>
-                            <p class="text-muted small mb-0" id="stationAddress">-</p>
+                            <p class="text-muted small mb-1" id="stationAddress">-</p>
+                            <div class="d-flex align-items-center small" id="stationRatingRow">
+                                <span class="text-warning me-2"><i class="bi bi-star-fill"></i> <strong id="stationAvgRating">-</strong>/5</span>
+                                <span class="text-muted me-3" id="stationTotalReviews">(0 reviews)</span>
+                                <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" onclick="toggleStationReviews()"><i class="bi bi-chat-left-text me-1"></i>Read Reviews</button>
+                            </div>
                         </div>
                         <div class="text-end">
                             <span class="badge bg-secondary" id="companyBadge">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Expandable Reviews Container -->
+                    <div id="bookingReviewsCollapse" class="card bg-light border-0 rounded-3 p-3 mb-3 d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
+                            <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-stars text-warning me-1"></i> Station Feedback & Reviews</h6>
+                            <button type="button" class="btn-close btn-sm" onclick="toggleStationReviews()" aria-label="Close"></button>
+                        </div>
+                        <div id="bookingReviewsList" class="small text-muted">
+                            <div class="spinner-border spinner-border-sm text-primary me-1" role="status"></div> Loading feedback...
                         </div>
                     </div>
 
@@ -162,6 +181,11 @@
                 document.getElementById('stationAddress').innerText = `${stationData.address}, ${stationData.city}, ${stationData.state}`;
                 document.getElementById('companyBadge').innerText = stationData.companyName;
 
+                // Ratings update
+                const avg = stationData.averageRating > 0 ? stationData.averageRating.toFixed(1) : '5.0';
+                document.getElementById('stationAvgRating').innerText = avg;
+                document.getElementById('stationTotalReviews').innerText = `(${stationData.totalReviews || 0} reviews)`;
+
                 // Geofence Banner Update
                 const dist = stationData.distanceKm;
                 const isWithin = dist !== null && dist <= 30.0;
@@ -224,8 +248,7 @@
         document.getElementById('bookingForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Verifying slot & geofence...`;
+            setButtonLoading(btn, 'Processing Booking...');
 
             const startTimeRaw = document.getElementById('startTime').value;
             // Append seconds for ISO format
@@ -248,7 +271,7 @@
                     body: JSON.stringify(bookingPayload)
                 });
 
-                btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Settling Demo Token Payment...`;
+                setButtonLoading(btn, 'Processing Demo Payment...');
 
                 // Step 2: Process Demo Token Payment
                 const simulateFailure = document.getElementById('simulateFailure').checked;
@@ -275,12 +298,59 @@
 
             } catch (err) {
                 showAlert(err.message || 'Failed to complete booking reservation.', 'danger');
-                btn.disabled = false;
-                btn.innerHTML = `<i class="bi bi-check2-circle me-1"></i> Confirm Pre-Booking & Pay Demo Token`;
+                restoreButton(btn);
             }
         });
 
-        document.addEventListener('DOMContentLoaded', loadData);
+        let reviewsLoaded = false;
+        async function toggleStationReviews() {
+            const el = document.getElementById('bookingReviewsCollapse');
+            if (!el.classList.contains('d-none')) {
+                el.classList.add('d-none');
+                return;
+            }
+            el.classList.remove('d-none');
+            if (!reviewsLoaded && stationId) {
+                try {
+                    const listEl = document.getElementById('bookingReviewsList');
+                    const reviews = await apiFetch(`/reviews/station/${stationId}`);
+                    if (!reviews || reviews.length === 0) {
+                        listEl.innerHTML = '<span class="text-muted">No reviews recorded yet for this station.</span>';
+                        reviewsLoaded = true;
+                        return;
+                    }
+                    let html = '<div class="list-group list-group-flush bg-transparent">';
+                    reviews.forEach(r => {
+                        const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Recent';
+                        const isSimulated = r.comment && r.comment.includes('[Simulated Demo Review]');
+                        const cleanComment = isSimulated ? r.comment.replace('[Simulated Demo Review]', '').trim() : r.comment;
+                        html += `
+                            <div class="list-group-item bg-transparent px-0 py-2 border-bottom">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="text-dark">${r.driverName || 'Driver'}</strong>
+                                        <span class="text-warning ms-2"><i class="bi bi-star-fill"></i> ${r.rating}/5</span>
+                                        ${isSimulated ? '<span class="badge bg-secondary-subtle text-secondary border ms-2" style="font-size: 0.65rem;">Simulated Demo Review</span>' : ''}
+                                    </div>
+                                    <span class="text-muted" style="font-size: 0.75rem;">${dateStr}</span>
+                                </div>
+                                <div class="text-secondary mt-1 small">${cleanComment}</div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    listEl.innerHTML = html;
+                    reviewsLoaded = true;
+                } catch (err) {
+                    document.getElementById('bookingReviewsList').innerHTML = `<span class="text-danger">Failed to load reviews: ${err.message}</span>`;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            theme.init();
+            loadData();
+        });
     </script>
 </body>
 </html>

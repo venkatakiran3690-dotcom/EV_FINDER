@@ -34,6 +34,9 @@
                 <div class="d-flex align-items-center gap-2" id="navAuth">
                     <a href="/login.html" class="btn btn-outline-light btn-sm px-3"><i class="bi bi-box-arrow-in-right me-1"></i> Log In</a>
                     <a href="/register.html" class="btn btn-primary btn-sm px-3"><i class="bi bi-person-plus me-1"></i> Register as Driver</a>
+                    <button class="btn btn-outline-light btn-sm btn-theme-toggle ms-1" id="themeToggleBtn" onclick="theme.toggle()" title="Toggle Dark/Light Theme" aria-label="Toggle Dark/Light Theme">
+                        <i class="bi bi-moon-stars-fill"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -48,13 +51,22 @@
                         <i class="bi bi-shield-check text-success"></i>
                         <span>Centralized Multi-Tenant EV Charging Network &bull; 36 Stations across 14 Cities</span>
                     </div>
-                    <h1 class="display-4 fw-extrabold mb-3 lh-sm" style="letter-spacing: -0.03em;">
-                        Find, Reserve and Charge Your EV <span style="background: linear-gradient(135deg, #34d399 0%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">with Confidence</span>
+                    <h1 class="display-4 fw-extrabold mb-3 lh-sm animate-fade-up" style="letter-spacing: -0.03em;">
+                        Power Your Journey. <span style="background: linear-gradient(135deg, #34d399 0%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Charge Smarter.</span>
                     </h1>
                     <p class="lead text-slate-300 opacity-90 mb-4 fw-normal" style="max-width: 620px;">
-                        An intelligent, production-ready EV platform powered by Java 21 Spring Boot and MySQL.
-                        Featuring mathematical <strong>30 km server-side geofencing</strong>, pessimistic database concurrency locking, realistic simulated charging sessions, and automated GST billing.
+                        Discover charging stations, reserve your slot, track your charging session, and manage your bills&mdash;all in one place. Powered by Java 21 Spring Boot, MySQL, mathematical 30 km geofencing, and automated GST billing.
                     </p>
+
+                    <!-- Interactive Call to Action Buttons -->
+                    <div class="d-flex flex-wrap gap-3 mb-4">
+                        <a href="/station-search.html" class="btn btn-primary btn-lg px-4 shadow-sm">
+                            <i class="bi bi-geo-alt-fill me-2"></i>Find Charging Stations
+                        </a>
+                        <a href="/booking.html" class="btn btn-outline-light btn-lg px-4">
+                            <i class="bi bi-calendar-check me-2"></i>Book a Charging Slot
+                        </a>
+                    </div>
 
                     <!-- Prominent Station Search Bar -->
                     <div class="card border-0 shadow-lg rounded-4 p-2 bg-white text-dark mb-4" style="max-width: 600px;">
@@ -80,37 +92,37 @@
                 </div>
 
                 <div class="col-lg-5 d-none d-lg-block">
-                    <div class="card glass-panel border-0 text-white p-4 shadow-lg text-start" style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div class="card glass-panel border-0 text-white p-4 shadow-lg text-start animate-fade-up" style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.1);">
                         <div class="d-flex justify-content-between align-items-center pb-3 border-bottom border-secondary border-opacity-50 mb-3">
                             <div>
                                 <h6 class="fw-bold mb-0 text-white"><i class="bi bi-speedometer2 text-info me-2"></i> Live Grid Status</h6>
                                 <span class="small text-white-50">Real-time CPO operations</span>
                             </div>
-                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">100% OPERATIONAL</span>
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 pulse-glow">100% OPERATIONAL</span>
                         </div>
                         <div class="row g-2 mb-3">
                             <div class="col-6">
                                 <div class="bg-black bg-opacity-25 p-3 rounded-3 border border-white border-opacity-10">
                                     <span class="small text-white-50 d-block">Network Stations</span>
-                                    <h4 class="fw-bold mb-0 text-white">36 Hubs</h4>
+                                    <h4 class="fw-bold mb-0 text-white" id="statNetworkStations">36 Hubs</h4>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="bg-black bg-opacity-25 p-3 rounded-3 border border-white border-opacity-10">
                                     <span class="small text-white-50 d-block">Live Chargers</span>
-                                    <h4 class="fw-bold mb-0 text-info">121 Guns</h4>
+                                    <h4 class="fw-bold mb-0 text-info" id="statLiveChargers">121 Guns</h4>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="bg-black bg-opacity-25 p-3 rounded-3 border border-white border-opacity-10">
                                     <span class="small text-white-50 d-block">CPOs Connected</span>
-                                    <h4 class="fw-bold mb-0 text-warning">3 Operators</h4>
+                                    <h4 class="fw-bold mb-0 text-warning" id="statCpos">3 Operators</h4>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="bg-black bg-opacity-25 p-3 rounded-3 border border-white border-opacity-10">
                                     <span class="small text-white-50 d-block">Fast DC Power</span>
-                                    <h4 class="fw-bold mb-0 text-success">Up to 150 kW</h4>
+                                    <h4 class="fw-bold mb-0 text-success" id="statMaxPower">Up to 150 kW</h4>
                                 </div>
                             </div>
                         </div>
@@ -357,15 +369,49 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/api.js"></script>
     <script>
+        // Initialize theme toggle and preferences
+        theme.init();
+
         // Check if already logged in and update header
         const user = auth.getUser();
         if (user) {
             document.getElementById('navAuth').innerHTML = `
                 <span class="navbar-text text-light me-2 small"><i class="bi bi-person-circle text-success me-1"></i> ${user.fullName} (${user.role})</span>
                 <button class="btn btn-sm btn-outline-info" onclick="auth.redirectDashboard('${user.role}')"><i class="bi bi-speedometer2 me-1"></i> Dashboard</button>
-                <button class="btn btn-sm btn-outline-danger" onclick="auth.logout()"><i class="bi bi-box-arrow-right"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="auth.logout()" title="Sign Out"><i class="bi bi-box-arrow-right"></i></button>
+                <button class="btn btn-outline-light btn-sm btn-theme-toggle ms-1" id="themeToggleBtn" onclick="theme.toggle()" title="Toggle Dark/Light Theme">
+                    <i class="bi bi-moon-stars-fill"></i>
+                </button>
             `;
+            theme.init();
         }
+
+        // Animate live grid counters with actual API station metrics
+        async function loadLiveGridStats() {
+            try {
+                const stations = await apiFetch('/stations');
+                if (stations && stations.length > 0) {
+                    const totalStations = stations.length;
+                    const totalChargers = stations.reduce((acc, s) => acc + (s.operationalChargersCount || s.totalChargers || 0), 0);
+                    const companies = new Set(stations.map(s => s.companyName)).size;
+                    
+                    animateCounter('statNetworkStations', totalStations, 1200, '', ' Hubs');
+                    animateCounter('statLiveChargers', totalChargers > 0 ? totalChargers : 121, 1400, '', ' Guns');
+                    animateCounter('statCpos', companies > 0 ? companies : 3, 1000, '', ' Operators');
+                    animateCounter('statMaxPower', 150, 1200, 'Up to ', ' kW');
+                    return;
+                }
+            } catch (err) {
+                console.warn('Using baseline grid statistics:', err);
+            }
+            // Fallback animation with verified baseline values
+            animateCounter('statNetworkStations', 36, 1200, '', ' Hubs');
+            animateCounter('statLiveChargers', 121, 1400, '', ' Guns');
+            animateCounter('statCpos', 3, 1000, '', ' Operators');
+            animateCounter('statMaxPower', 150, 1200, 'Up to ', ' kW');
+        }
+
+        loadLiveGridStats();
     </script>
 </body>
 </html>

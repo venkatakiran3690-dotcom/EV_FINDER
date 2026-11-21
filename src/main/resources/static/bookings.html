@@ -30,6 +30,9 @@
                 <div class="d-flex align-items-center gap-2">
                     <span class="navbar-text text-light small" id="navUser">Driver</span>
                     <button class="btn btn-outline-danger btn-sm" onclick="auth.logout()"><i class="bi bi-box-arrow-right me-1"></i> Logout</button>
+                    <button class="btn btn-outline-light btn-sm btn-theme-toggle" id="themeToggleBtn" onclick="theme.toggle()" title="Toggle Dark/Light Theme" aria-label="Toggle Dark/Light Theme">
+                        <i class="bi bi-moon-stars-fill"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -167,7 +170,7 @@
                         `;
                     } else if (b.status === 'PENDING_PAYMENT') {
                         actionButtons = `
-                            <button class="btn btn-sm btn-warning text-dark me-1" onclick="retryPayment(${b.id})">
+                            <button class="btn btn-sm btn-warning text-dark me-1" onclick="retryPayment(${b.id}, this)">
                                 <i class="bi bi-credit-card"></i> Pay Token
                             </button>
                             <button class="btn btn-sm btn-outline-danger" onclick="cancelBooking(${b.id})">
@@ -218,7 +221,8 @@
             }
         }
 
-        async function retryPayment(bookingId) {
+        async function retryPayment(bookingId, btn) {
+            if (btn) setButtonLoading(btn, 'Processing Demo Payment...');
             try {
                 const res = await apiFetch('/payments/demo', {
                     method: 'POST',
@@ -228,6 +232,8 @@
                 loadBookings();
             } catch (err) {
                 showAlert(err.message, 'danger');
+            } finally {
+                if (btn) restoreButton(btn);
             }
         }
 
@@ -268,6 +274,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            theme.init();
             const user = auth.getUser();
             if (user) document.getElementById('navUser').innerText = user.fullName;
             loadBookings();

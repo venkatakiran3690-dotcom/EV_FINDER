@@ -68,10 +68,18 @@ public class DataLoader implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        if (!seedDemoData || userRepository.existsByEmail("admin@smartev.com")) {
+        if (!seedDemoData) {
             return;
         }
 
+        if (!userRepository.existsByEmail("admin@smartev.com")) {
+            seedInitialDemoData();
+        }
+
+        seedAdditionalDemoData();
+    }
+
+    private void seedInitialDemoData() {
         // 1. Companies (CPOs)
         Company tataPower = new Company(
                 "Tata Power EZ Charge",
@@ -715,6 +723,220 @@ public class DataLoader implements CommandLineRunner {
                     "127.0.0.1"
             );
             activityLogRepository.save(managerAssignLog);
+        }
+    }
+
+    private void seedAdditionalDemoData() {
+        // 1. Ensure Demo Drivers 3, 4, 5 exist
+        User driver = userRepository.findByEmail("driver@smartev.com").orElse(null);
+        User driver2 = userRepository.findByEmail("driver2@smartev.com").orElse(null);
+
+        User driver3 = userRepository.findByEmail("driver3@smartev.com")
+                .orElseGet(() -> userRepository.save(new User(
+                        "driver3@smartev.com",
+                        passwordEncoder.encode("Driver@123"),
+                        "Rahul Sharma",
+                        "+91 98765 43212",
+                        Role.DRIVER,
+                        null
+                )));
+
+        User driver4 = userRepository.findByEmail("driver4@smartev.com")
+                .orElseGet(() -> userRepository.save(new User(
+                        "driver4@smartev.com",
+                        passwordEncoder.encode("Driver@123"),
+                        "Kavya Raman",
+                        "+91 98765 43213",
+                        Role.DRIVER,
+                        null
+                )));
+
+        User driver5 = userRepository.findByEmail("driver5@smartev.com")
+                .orElseGet(() -> userRepository.save(new User(
+                        "driver5@smartev.com",
+                        passwordEncoder.encode("Driver@123"),
+                        "Siddharth Verma",
+                        "+91 98765 43214",
+                        Role.DRIVER,
+                        null
+                )));
+
+        // 2. Ensure Registered Vehicles for Drivers 3, 4, 5
+        Vehicle vehTiago = vehicleRepository.findByLicensePlate("TS-07-EV-2045")
+                .orElseGet(() -> vehicleRepository.save(new Vehicle(
+                        driver3,
+                        "Tata",
+                        "Tiago EV Long Range",
+                        2024,
+                        "TS-07-EV-2045",
+                        24.0,
+                        "CCS2"
+                )));
+
+        Vehicle vehXuv400 = vehicleRepository.findByLicensePlate("TN-02-EV-5544")
+                .orElseGet(() -> vehicleRepository.save(new Vehicle(
+                        driver4,
+                        "Mahindra",
+                        "XUV400 EV",
+                        2023,
+                        "TN-02-EV-5544",
+                        39.4,
+                        "CCS2"
+                )));
+
+        Vehicle vehAtto3 = vehicleRepository.findByLicensePlate("AP-16-EV-9021")
+                .orElseGet(() -> vehicleRepository.save(new Vehicle(
+                        driver5,
+                        "BYD",
+                        "Atto 3 Superior",
+                        2024,
+                        "AP-16-EV-9021",
+                        60.48,
+                        "CCS2"
+                )));
+
+        Vehicle vehIoniq5 = vehicleRepository.findByLicensePlate("TS-09-EV-1008")
+                .orElseGet(() -> {
+                    if (driver2 != null) {
+                        return vehicleRepository.findByDriverId(driver2.getId()).stream().findFirst().orElse(null);
+                    }
+                    return null;
+                });
+
+        // 3. Lookup Stations and Chargers
+        Station stHyd1 = stationRepository.findByName("Tata Power EV Hub - Cyber Towers")
+                .orElseGet(() -> stationRepository.findAll().stream().filter(s -> s.getName().contains("Cyber Towers")).findFirst().orElse(null));
+        Charger chgHyd1 = chargerRepository.findByChargerIdentifier("TP-HYD-HITEC-DC-120KW-01")
+                .orElseGet(() -> stHyd1 != null ? chargerRepository.findByStationId(stHyd1.getId()).stream().findFirst().orElse(null) : null);
+
+        Station stChn1 = stationRepository.findByName("Tata Power EV Hub - OMR IT Expressway")
+                .orElseGet(() -> stationRepository.findAll().stream().filter(s -> s.getName().contains("OMR")).findFirst().orElse(null));
+        Charger chgChn1 = chargerRepository.findByChargerIdentifier("TP-CHN-OMR-DC-150KW-01")
+                .orElseGet(() -> stChn1 != null ? chargerRepository.findByStationId(stChn1.getId()).stream().findFirst().orElse(null) : null);
+
+        Station stVja1 = stationRepository.findByName("Jio-bp pulse Highway Oasis - Gannavaram Airport")
+                .orElseGet(() -> stationRepository.findAll().stream().filter(s -> s.getName().contains("Gannavaram")).findFirst().orElse(null));
+        Charger chgVja1 = chargerRepository.findByChargerIdentifier("JBP-VJA-GAN-DC-120KW-01")
+                .orElseGet(() -> stVja1 != null ? chargerRepository.findByStationId(stVja1.getId()).stream().findFirst().orElse(null) : null);
+
+        Station stBlr1 = stationRepository.findByName("Tata Power EV Hub - Indiranagar")
+                .orElseGet(() -> stationRepository.findAll().stream().filter(s -> s.getName().contains("Indiranagar")).findFirst().orElse(null));
+
+        Station stHyd2 = stationRepository.findByName("Zeon Electric Charging - Financial District Hub")
+                .orElseGet(() -> stationRepository.findAll().stream().filter(s -> s.getName().contains("Financial District")).findFirst().orElse(null));
+
+        // 4. Seed Exactly 3 Demo Bookings
+        // Booking 1 (Overall BK-DEMO-002): CONFIRMED (Upcoming Reservation in Hyderabad)
+        if (stHyd1 != null && chgHyd1 != null && driver2 != null && vehIoniq5 != null) {
+            if (bookingRepository.findByBookingCode("BK-DEMO-002").isEmpty()) {
+                LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
+                LocalDateTime end = start.plusMinutes(45);
+                Booking b2 = new Booking("BK-DEMO-002", driver2, vehIoniq5, stHyd1, chgHyd1, start, end, 5.4, BigDecimal.valueOf(150.00));
+                b2.setStatus("CONFIRMED");
+                bookingRepository.save(b2);
+
+                Payment p2 = new Payment(b2, driver2, "TXN-DEMO-INIT002", BigDecimal.valueOf(150.00), "DEMO_TOKEN", "SUCCESS", "Demo Token Wallet");
+                paymentRepository.save(p2);
+            }
+        }
+
+        // Booking 2 (Overall BK-DEMO-003): COMPLETED (Charging Session in Chennai)
+        if (stChn1 != null && chgChn1 != null && vehXuv400 != null) {
+            if (bookingRepository.findByBookingCode("BK-DEMO-003").isEmpty()) {
+                LocalDateTime start = LocalDateTime.now().minusDays(1).withHour(16).withMinute(0).withSecond(0).withNano(0);
+                LocalDateTime end = start.plusMinutes(40);
+                Booking b3 = new Booking("BK-DEMO-003", driver4, vehXuv400, stChn1, chgChn1, start, end, 6.8, BigDecimal.valueOf(150.00));
+                b3.setStatus("COMPLETED");
+                bookingRepository.save(b3);
+
+                Payment p3 = new Payment(b3, driver4, "TXN-DEMO-INIT003", BigDecimal.valueOf(150.00), "DEMO_TOKEN", "SUCCESS", "Demo Token Wallet");
+                paymentRepository.save(p3);
+
+                ChargingSession s3 = new ChargingSession(b3, chgChn1, driver4, "SESS-DEMO-002", start, 25);
+                s3.setEndTime(end);
+                s3.setCurrentBatteryPct(85);
+                s3.setEnergyConsumedKwh(32.40);
+                s3.setStatus("COMPLETED");
+                sessionRepository.save(s3);
+            }
+        }
+
+        // Booking 3 (Overall BK-DEMO-004): COMPLETED with Generated Bill in Vijayawada
+        if (stVja1 != null && chgVja1 != null && vehAtto3 != null) {
+            if (bookingRepository.findByBookingCode("BK-DEMO-004").isEmpty()) {
+                LocalDateTime start = LocalDateTime.now().minusDays(2).withHour(11).withMinute(30).withSecond(0).withNano(0);
+                LocalDateTime end = start.plusMinutes(50);
+                Booking b4 = new Booking("BK-DEMO-004", driver5, vehAtto3, stVja1, chgVja1, start, end, 7.5, BigDecimal.valueOf(150.00));
+                b4.setStatus("COMPLETED");
+                bookingRepository.save(b4);
+
+                Payment p4 = new Payment(b4, driver5, "TXN-DEMO-INIT004", BigDecimal.valueOf(150.00), "DEMO_TOKEN", "SUCCESS", "Demo Token Wallet");
+                paymentRepository.save(p4);
+
+                ChargingSession s4 = new ChargingSession(b4, chgVja1, driver5, "SESS-DEMO-003", start, 30);
+                s4.setEndTime(end);
+                s4.setCurrentBatteryPct(88);
+                s4.setEnergyConsumedKwh(28.00);
+                s4.setStatus("COMPLETED");
+                sessionRepository.save(s4);
+
+                // Tariff: Price=18.50, Service=20.00, Tax=18%
+                // 28.00 * 18.50 = 518.00; Subtotal = 538.00; Tax = 96.84; Total = 634.84
+                Bill bill4 = new Bill(
+                        "INV-2026-0002",
+                        s4,
+                        b4,
+                        driver5,
+                        stVja1.getCompany(),
+                        stVja1,
+                        chgVja1,
+                        28.00,
+                        BigDecimal.valueOf(18.50),
+                        BigDecimal.valueOf(518.00),
+                        BigDecimal.valueOf(20.00),
+                        BigDecimal.valueOf(18.00),
+                        BigDecimal.valueOf(96.84),
+                        BigDecimal.valueOf(634.84),
+                        "PAID"
+                );
+                billRepository.save(bill4);
+            }
+        }
+
+        // 5. Seed Feedback and Ratings from 5 Distinct Drivers
+        if (driver != null && stHyd1 != null && !reviewRepository.existsByStationIdAndDriverId(stHyd1.getId(), driver.getId())) {
+            Review r1 = new Review(stHyd1, driver, 5,
+                    "Excellent high-speed charging experience at Cyber Towers! The 120 kW charger delivered full capacity and the booking process was completely seamless. [Simulated Demo Review]");
+            r1.setCreatedAt(LocalDateTime.now().minusDays(3));
+            reviewRepository.save(r1);
+        }
+
+        if (driver2 != null && stChn1 != null && !reviewRepository.existsByStationIdAndDriverId(stChn1.getId(), driver2.getId())) {
+            Review r2 = new Review(stChn1, driver2, 4,
+                    "Reliable 150 kW DC charging post along OMR Sholinganallur. Pre-booking saved me time during peak office commute. [Simulated Demo Review]");
+            r2.setCreatedAt(LocalDateTime.now().minusDays(2));
+            reviewRepository.save(r2);
+        }
+
+        if (driver3 != null && stVja1 != null && !reviewRepository.existsByStationIdAndDriverId(stVja1.getId(), driver3.getId())) {
+            Review r3 = new Review(stVja1, driver3, 5,
+                    "Fantastic highway charging hub near Gannavaram Airport! Spotless amenities, rapid 120 kW charging, and easy payment. [Simulated Demo Review]");
+            r3.setCreatedAt(LocalDateTime.now().minusDays(2));
+            reviewRepository.save(r3);
+        }
+
+        if (driver4 != null && stBlr1 != null && !reviewRepository.existsByStationIdAndDriverId(stBlr1.getId(), driver4.getId())) {
+            Review r4 = new Review(stBlr1, driver4, 4,
+                    "Very convenient Indiranagar location with 60 kW DC charger. Geofenced slot reservation worked perfectly within 30 km. [Simulated Demo Review]");
+            r4.setCreatedAt(LocalDateTime.now().minusDays(1));
+            reviewRepository.save(r4);
+        }
+
+        if (driver5 != null && stHyd2 != null && !reviewRepository.existsByStationIdAndDriverId(stHyd2.getId(), driver5.getId())) {
+            Review r5 = new Review(stHyd2, driver5, 3,
+                    "Good charging speed at WaveRock Gachibowli, but the waiting bay can get crowded during peak evening hours. [Simulated Demo Review]");
+            r5.setCreatedAt(LocalDateTime.now().minusDays(1));
+            reviewRepository.save(r5);
         }
     }
 

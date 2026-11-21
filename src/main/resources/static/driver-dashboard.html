@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Driver Dashboard - Smart EV Platform</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -28,9 +31,12 @@
                     <li class="nav-item"><a class="nav-link" href="/bookings.html"><i class="bi bi-calendar-check me-1"></i> My Bookings</a></li>
                     <li class="nav-item"><a class="nav-link" href="/billing.html"><i class="bi bi-receipt me-1"></i> Invoices</a></li>
                 </ul>
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
                     <span class="navbar-text text-light small" id="navUser"><i class="bi bi-person-circle text-success me-1"></i> Driver</span>
                     <button class="btn btn-outline-danger btn-sm" onclick="auth.logout()"><i class="bi bi-box-arrow-right me-1"></i> Logout</button>
+                    <button class="btn btn-outline-light btn-sm btn-theme-toggle" id="themeToggleBtn" onclick="theme.toggle()" title="Toggle Dark/Light Theme" aria-label="Toggle Dark/Light Theme">
+                        <i class="bi bi-moon-stars-fill"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -316,42 +322,36 @@
         auth.checkRoleGuard(['DRIVER', 'PLATFORM_ADMIN']);
 
         async function initDashboard() {
+            theme.init();
             const user = auth.getUser();
             if (user) {
                 document.getElementById('navUser').innerHTML = `<i class="bi bi-person-circle text-success me-1"></i> ${user.fullName}`;
                 document.getElementById('driverGreeting').innerText = `Welcome, ${user.fullName}!`;
             }
 
+            // 1. Dashboard Stats (fail-safe with smooth animation)
             try {
-                // 1. Dashboard Stats
                 const stats = await apiFetch('/dashboard/driver');
-                document.getElementById('statBookings').innerText = stats.totalBookings;
-                document.getElementById('statEnergy').innerText = `${stats.totalEnergyKwh} kWh`;
-                document.getElementById('statCo2').innerText = `${stats.estimatedCo2SavedKg} kg`;
-                document.getElementById('statExpenditure').innerText = formatCurrency(stats.totalRevenue);
-                document.getElementById('notifBadge').innerText = `${stats.unreadNotifications} unread`;
-
-                // 2. Active Session check
-                loadActiveSession();
-
-                // 3. Active Bookings
-                loadActiveBookings();
-
-                // 4. Nearby Stations
-                loadNearbyStations();
-
-                // 5. Recent Bills
-                loadRecentBills();
-
-                // 6. Vehicles
-                loadVehicles();
-
-                // 7. Notifications
-                loadNotifications();
-
+                if (stats) {
+                    animateCounter('statBookings', stats.totalBookings ?? 0, 1000);
+                    animateCounter('statEnergy', stats.totalEnergyKwh ?? 0, 1200, '', ' kWh', 1);
+                    animateCounter('statCo2', stats.estimatedCo2SavedKg ?? 0, 1200, '', ' kg', 1);
+                    animateCounter('statExpenditure', stats.totalRevenue ?? 0, 1400, '₹', '', 2);
+                    document.getElementById('notifBadge').innerText = `${stats.unreadNotifications ?? 0} unread`;
+                }
             } catch (err) {
-                showAlert('Failed to load dashboard: ' + err.message, 'danger');
+                console.error('Failed to load driver dashboard stats:', err);
             }
+
+            // 2. Load all dashboard cards concurrently and independently
+            await Promise.allSettled([
+                loadActiveSession(),
+                loadActiveBookings(),
+                loadNearbyStations(),
+                loadRecentBills(),
+                loadVehicles(),
+                loadNotifications()
+            ]);
         }
 
         async function loadActiveSession() {
@@ -374,13 +374,18 @@
 
         async function loadActiveBookings() {
             const container = document.getElementById('activeBookingContainer');
+            container.innerHTML = `
+                <div class="text-center py-3 text-muted small">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>Loading bookings...
+                </div>
+            `;
             try {
-                const bookings = await apiFetch('/bookings/my');
+                const bookings = await apiFetch('/bookings');
                 if (!bookings || bookings.length === 0) {
                     container.innerHTML = `
                         <div class="text-center py-3 text-muted">
                             <i class="bi bi-calendar-x fs-2 text-secondary d-block mb-1"></i>
-                            <span class="small">No active bookings scheduled. <a href="/station-search.html">Find a station</a> to reserve.</span>
+                            <span class="small">No active or upcoming bookings yet. <a href="/station-search.html">Find a station</a> to reserve.</span>
                         </div>
                     `;
                     return;
@@ -390,6 +395,9 @@
                 container.innerHTML = recent.map(b => {
                     const isUpcoming = b.status === 'CONFIRMED' || b.status === 'PENDING';
                     const statusBadge = isUpcoming ? 'bg-success' : (b.status === 'COMPLETED' ? 'bg-secondary' : 'bg-danger');
+                    const holdFee = b.tokenAmount !== undefined && b.tokenAmount !== null ? b.tokenAmount : (b.bookingFee ?? 0);
+                    const chargerDetails = `${b.chargerIdentifier || 'Charger'} (${b.chargerType || 'EV'}${b.connectorType ? ' - ' + b.connectorType : ''})`;
+                    const slotInfo = b.endTime ? `${formatDateTime(b.startTime)} &ndash; ${formatTime(b.endTime)}` : formatDateTime(b.startTime);
 
                     return `
                         <div class="border rounded-3 p-3 mb-2 bg-light">
@@ -401,17 +409,18 @@
                                 <code class="small fw-bold text-primary">${b.bookingCode}</code>
                             </div>
                             <div class="small text-muted mb-2">
-                                <i class="bi bi-clock me-1"></i> ${formatDateTime(b.startTime)} &bull; ${b.chargerIdentifier}
+                                <i class="bi bi-clock me-1"></i> ${slotInfo} &bull; ${chargerDetails}
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="small text-muted">Hold Fee: <strong>₹${b.bookingFee}</strong></span>
+                                <span class="small text-muted">Hold Fee: <strong>${formatCurrency(holdFee)}</strong></span>
                                 ${isUpcoming ? `<a href="/charging-session.html" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.75rem;"><i class="bi bi-lightning-fill"></i> Start Charging</a>` : ''}
                             </div>
                         </div>
                     `;
                 }).join('');
             } catch (err) {
-                container.innerHTML = `<div class="text-danger small">Error loading bookings</div>`;
+                console.error('Failed to load active bookings:', err);
+                container.innerHTML = `<div class="text-danger small p-2"><i class="bi bi-exclamation-triangle me-1"></i>Error loading bookings. Please try again later.</div>`;
             }
         }
 
@@ -437,38 +446,73 @@
                     </div>
                 `).join('');
             } catch (err) {
+                console.error('Failed to load nearby stations:', err);
                 container.innerHTML = `<div class="text-danger small">Error loading nearby stations</div>`;
             }
         }
 
         async function loadRecentBills() {
             const container = document.getElementById('recentBillsContainer');
+            container.innerHTML = `
+                <div class="text-center py-3 text-muted small">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>Loading invoices...
+                </div>
+            `;
             try {
-                const bills = await apiFetch('/bills/my');
+                const bills = await apiFetch('/bills');
                 if (!bills || bills.length === 0) {
                     container.innerHTML = `
                         <div class="text-center py-3 text-muted small">
                             <i class="bi bi-receipt fs-2 text-secondary d-block mb-1"></i>
-                            No invoices generated yet.
+                            No invoices available yet.
                         </div>
                     `;
                     return;
                 }
 
-                container.innerHTML = bills.slice(0, 3).map(bill => `
+                container.innerHTML = bills.slice(0, 3).map(bill => {
+                    const units = Number(bill.energyConsumedKwh ?? bill.totalUnitsKwh ?? 0).toFixed(2);
+                    const billDate = formatDateTime(bill.createdAt);
+                    return `
                     <div class="border rounded-3 p-2 mb-2 bg-light d-flex justify-content-between align-items-center">
                         <div>
                             <strong class="small text-dark">${bill.invoiceNumber}</strong>
                             <span class="badge bg-success bg-opacity-25 text-success ms-1" style="font-size: 0.65rem;">${bill.paymentStatus}</span>
-                            <div class="text-muted" style="font-size: 0.72rem;">${bill.stationName} &bull; <strong>${bill.totalUnitsKwh} kWh</strong> &bull; ${formatCurrency(bill.totalAmount)}</div>
+                            <div class="text-muted" style="font-size: 0.72rem;">
+                                <i class="bi bi-calendar-event me-1"></i>${billDate} &bull; ${bill.stationName} &bull; <strong>${units} kWh</strong> &bull; <strong>${formatCurrency(bill.totalAmount)}</strong>
+                            </div>
                         </div>
-                        <a href="/api/bills/${bill.id}/pdf" target="_blank" class="btn btn-sm btn-outline-dark py-0 px-2" style="font-size: 0.75rem;">
+                        <button onclick="downloadInvoicePdf(${bill.id}, '${bill.invoiceNumber}', this)" class="btn btn-sm btn-outline-dark py-0 px-2" style="font-size: 0.75rem;">
                             <i class="bi bi-file-earmark-pdf text-danger me-1"></i> PDF
-                        </a>
+                        </button>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
             } catch (err) {
-                container.innerHTML = `<div class="text-danger small">Error loading invoices</div>`;
+                console.error('Failed to load recent bills:', err);
+                container.innerHTML = `<div class="text-danger small p-2"><i class="bi bi-exclamation-triangle me-1"></i>Error loading invoices. Please try again later.</div>`;
+            }
+        }
+
+        async function downloadInvoicePdf(billId, invoiceNumber, btnEl) {
+            if (btnEl) setButtonLoading(btnEl, 'Preparing...');
+            try {
+                showAlert('Generating server-side PDF invoice...', 'info');
+                const blob = await apiFetch(`/bills/${billId}/invoice`);
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `${invoiceNumber}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                showAlert('Invoice downloaded successfully!', 'success');
+            } catch (err) {
+                console.error('Failed to download invoice PDF:', err);
+                showAlert('Failed to download PDF invoice: ' + err.message, 'danger');
+            } finally {
+                if (btnEl) restoreButton(btnEl);
             }
         }
 
@@ -500,6 +544,7 @@
                     </div>
                 `).join('');
             } catch (err) {
+                console.error('Failed to load vehicles:', err);
                 container.innerHTML = `<div class="text-danger small">Error loading vehicles</div>`;
             }
         }
@@ -521,7 +566,9 @@
                         <div class="text-secondary small mt-1">${n.message}</div>
                     </div>
                 `).join('');
-            } catch (ignored) {}
+            } catch (err) {
+                console.error('Failed to load notifications:', err);
+            }
         }
 
         function openAddVehicleModal() {

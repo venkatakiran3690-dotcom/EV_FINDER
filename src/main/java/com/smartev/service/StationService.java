@@ -278,10 +278,11 @@ public class StationService {
             response.setEstimatedWaitMinutes(0);
         }
 
-        // Average rating
+        // Average rating & review count
         Double avgRating = reviewRepository.getAverageRatingForStation(station.getId());
         response.setAverageRating(BigDecimal.valueOf(avgRating != null ? avgRating : 0.0)
                 .setScale(1, RoundingMode.HALF_UP).doubleValue());
+        response.setTotalReviews(reviewRepository.countByStationId(station.getId()));
 
         // Base tariff preview
         List<Tariff> tariffs = tariffRepository.findApplicableTariffs(station.getCompany().getId(), station.getId(), "ALL");

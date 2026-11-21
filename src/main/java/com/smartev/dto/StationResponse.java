@@ -26,6 +26,7 @@ public class StationResponse {
     private Long operationalChargersCount;
     private Integer estimatedWaitMinutes;
     private Double averageRating;
+    private Long totalReviews = 0L;
     private BigDecimal baseTariffPerKwh;
     private List<ChargerResponse> chargers = new ArrayList<>();
 
@@ -84,6 +85,9 @@ public class StationResponse {
 
     public Double getAverageRating() { return averageRating; }
     public void setAverageRating(Double averageRating) { this.averageRating = averageRating; }
+
+    public Long getTotalReviews() { return totalReviews; }
+    public void setTotalReviews(Long totalReviews) { this.totalReviews = totalReviews; }
 
     public BigDecimal getBaseTariffPerKwh() { return baseTariffPerKwh; }
     public void setBaseTariffPerKwh(BigDecimal baseTariffPerKwh) { this.baseTariffPerKwh = baseTariffPerKwh; }

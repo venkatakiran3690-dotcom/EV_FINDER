@@ -7,9 +7,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StationRepository extends JpaRepository<Station, Long> {
+    Optional<Station> findByName(String name);
     List<Station> findByCompanyId(Long companyId);
     List<Station> findByOperationalStatus(String operationalStatus);
 

@@ -30,6 +30,9 @@
                 <div class="d-flex align-items-center gap-2">
                     <span class="navbar-text text-light small" id="navUser">Driver</span>
                     <button class="btn btn-outline-danger btn-sm" onclick="auth.logout()"><i class="bi bi-box-arrow-right me-1"></i> Logout</button>
+                    <button class="btn btn-outline-light btn-sm btn-theme-toggle" id="themeToggleBtn" onclick="theme.toggle()" title="Toggle Dark/Light Theme" aria-label="Toggle Dark/Light Theme">
+                        <i class="bi bi-moon-stars-fill"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -114,7 +117,7 @@
                         <td class="fs-6 fw-bold text-dark">₹${b.totalAmount}</td>
                         <td><span class="badge bg-success">${b.paymentStatus}</span></td>
                         <td class="text-end">
-                            <button class="btn btn-outline-primary btn-sm" onclick="downloadPdf(${b.id}, '${b.invoiceNumber}')">
+                            <button class="btn btn-outline-primary btn-sm" onclick="downloadPdf(${b.id}, '${b.invoiceNumber}', this)">
                                 <i class="bi bi-file-earmark-pdf"></i> Download PDF
                             </button>
                         </td>
@@ -126,7 +129,8 @@
             }
         }
 
-        async function downloadPdf(billId, invoiceNumber) {
+        async function downloadPdf(billId, invoiceNumber, btn) {
+            if (btn) setButtonLoading(btn, 'Preparing Invoice...');
             try {
                 showAlert('Generating authenticated server-side PDF invoice...', 'info');
                 const blob = await apiFetch(`/bills/${billId}/invoice`);
@@ -141,10 +145,13 @@
                 showAlert('Invoice downloaded successfully!', 'success');
             } catch (err) {
                 showAlert('Failed to download PDF invoice: ' + err.message, 'danger');
+            } finally {
+                if (btn) restoreButton(btn);
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            theme.init();
             const user = auth.getUser();
             if (user) document.getElementById('navUser').innerText = user.fullName;
             loadBills();

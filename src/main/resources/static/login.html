@@ -19,7 +19,12 @@
                     <span class="text-success fw-normal">Infrastructure</span>
                 </div>
             </a>
-            <a href="/index.html" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left me-1"></i> Back to Home</a>
+            <div class="d-flex align-items-center gap-2">
+                <a href="/index.html" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left me-1"></i> Back to Home</a>
+                <button class="btn btn-outline-light btn-sm btn-theme-toggle" id="themeToggleBtn" onclick="theme.toggle()" title="Toggle Dark/Light Theme" aria-label="Toggle Dark/Light Theme">
+                    <i class="bi bi-moon-stars-fill"></i>
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -96,6 +101,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/api.js"></script>
     <script>
+        theme.init();
+
         function fillCreds(email, password) {
             document.getElementById('email').value = email;
             document.getElementById('password').value = password;
@@ -104,8 +111,7 @@
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Authenticating...`;
+            setButtonLoading(btn, 'Authenticating...');
 
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
@@ -131,8 +137,7 @@
                 }, 800);
             } catch (err) {
                 showAlert(err.message || 'Login failed. Please verify credentials.', 'danger');
-                btn.disabled = false;
-                btn.innerHTML = `<i class="bi bi-box-arrow-in-right me-1"></i> Sign In`;
+                restoreButton(btn);
             }
         });
     </script>

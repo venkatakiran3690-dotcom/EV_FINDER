@@ -89,6 +89,9 @@ public class BillResponse {
     public Double getEnergyConsumedKwh() { return energyConsumedKwh; }
     public void setEnergyConsumedKwh(Double energyConsumedKwh) { this.energyConsumedKwh = energyConsumedKwh; }
 
+    public Double getTotalUnitsKwh() { return energyConsumedKwh; }
+    public void setTotalUnitsKwh(Double totalUnitsKwh) { this.energyConsumedKwh = totalUnitsKwh; }
+
     public BigDecimal getPricePerKwh() { return pricePerKwh; }
     public void setPricePerKwh(BigDecimal pricePerKwh) { this.pricePerKwh = pricePerKwh; }
 

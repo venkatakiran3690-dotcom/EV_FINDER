@@ -20,9 +20,12 @@
                 </div>
                 <span class="badge bg-primary ms-2">Live Session Simulation</span>
             </a>
-            <div class="d-flex gap-2">
+            <div class="d-flex align-items-center gap-2">
                 <a href="/bookings.html" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left me-1"></i> My Bookings</a>
                 <a href="/driver-dashboard.html" class="btn btn-outline-info btn-sm"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+                <button class="btn btn-outline-light btn-sm btn-theme-toggle" id="themeToggleBtn" onclick="theme.toggle()" title="Toggle Dark/Light Theme" aria-label="Toggle Dark/Light Theme">
+                    <i class="bi bi-moon-stars-fill"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -189,8 +192,7 @@
         async function completeSession() {
             if (!currentSession) return;
             const btn = document.getElementById('btnComplete');
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Generating Tax Invoice...`;
+            setButtonLoading(btn, 'Generating Tax Invoice...');
 
             try {
                 clearInterval(timerInterval);
@@ -208,12 +210,14 @@
 
             } catch (err) {
                 showAlert(err.message, 'danger');
-                btn.disabled = false;
-                btn.innerHTML = `<i class="bi bi-stop-circle me-1"></i> Stop Charging & Generate Invoice`;
+                restoreButton(btn);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', initSession);
+        document.addEventListener('DOMContentLoaded', () => {
+            theme.init();
+            initSession();
+        });
     </script>
 </body>
 </html>

@@ -33,8 +33,9 @@ public class BillingController {
 
     /**
      * List bills and invoices for the authenticated user.
+     * Supports both /api/bills and /api/bills/my.
      */
-    @GetMapping
+    @GetMapping({"", "/my"})
     public ResponseEntity<List<BillResponse>> getBills(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         User currentUser = userRepository.findById(userPrincipal.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -56,8 +57,9 @@ public class BillingController {
 
     /**
      * Download authorized server-side generated PDF invoice.
+     * Supports both /api/bills/{id}/invoice and /api/bills/{id}/pdf.
      */
-    @GetMapping("/{id}/invoice")
+    @GetMapping({"/{id}/invoice", "/{id}/pdf"})
     public ResponseEntity<byte[]> downloadInvoicePdf(
             @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {

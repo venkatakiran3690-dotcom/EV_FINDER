@@ -41,8 +41,9 @@ public class BookingController {
 
     /**
      * List bookings for current driver (or all for admin/company).
+     * Supports both /api/bookings and /api/bookings/my.
      */
-    @GetMapping
+    @GetMapping({"", "/my"})
     public ResponseEntity<List<BookingResponse>> getBookings(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         User currentUser = userRepository.findById(userPrincipal.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));

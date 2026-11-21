@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface ChargerRepository extends JpaRepository<Charger, Long> {
+    Optional<Charger> findByChargerIdentifier(String chargerIdentifier);
     List<Charger> findByStationId(Long stationId);
     List<Charger> findByStationIdAndOperationalStatus(Long stationId, String operationalStatus);
     List<Charger> findByStationIdAndAvailabilityStatus(Long stationId, String availabilityStatus);

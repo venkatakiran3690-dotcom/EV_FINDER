@@ -1,71 +1,233 @@
 /* ============================================================================
-   SMART EV CHARGING PLATFORM - MODERN DESIGN SYSTEM
-   Professional Enterprise EV UI for Academic Final-Year Project Demonstration
+   SMART EV CHARGING PLATFORM - PREMIUM ENTERPRISE DESIGN SYSTEM
+   Professional Modern UI/UX with Micro-Interactions, Animations & Themes
+   Compatible with Java 21 Spring Boot + Bootstrap 5.3 + Leaflet.js
    ============================================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
+/* ============================================================================
+   1. CSS VARIABLES & DESIGN TOKENS (LIGHT & DARK THEMES)
+   ============================================================================ */
 :root {
-    /* Brand Palette */
-    --ev-primary: #059669;        /* Emerald Green - EV eco standard */
+    /* Brand Accent Colors */
+    --ev-primary: #059669;          /* Emerald Green */
     --ev-primary-hover: #047857;
     --ev-primary-light: #ecfdf5;
-    --ev-accent: #0284c7;         /* Electric Cyan/Blue */
+    --ev-primary-glow: rgba(16, 185, 129, 0.35);
+
+    --ev-accent: #0284c7;           /* Electric Cyan/Blue */
+    --ev-accent-hover: #0369a1;
     --ev-accent-light: #e0f2fe;
-    --ev-warning: #d97706;        /* Amber */
+    --ev-accent-glow: rgba(2, 132, 199, 0.35);
+
+    --ev-cyan: #06b6d4;
+    --ev-warning: #f59e0b;          /* Vibrant Amber */
     --ev-warning-light: #fffbeb;
-    --ev-danger: #e11d48;         /* Rose Red */
+    --ev-danger: #e11d48;           /* Rose Red */
     --ev-danger-light: #fff1f2;
-    --ev-dark: #0f172a;           /* Deep Slate */
-    --ev-dark-surface: #1e293b;
-    --ev-body-bg: #f8fafc;
-    --ev-card-bg: #ffffff;
+    --ev-info: #0ea5e9;
+
+    /* Light Theme Neutral Foundations */
+    --ev-bg-main: #f8fafc;
+    --ev-bg-surface: #ffffff;
+    --ev-bg-surface-elevated: #ffffff;
+    --ev-bg-subtle: #f1f5f9;
+    --ev-bg-card-hover: #ffffff;
+
     --ev-border: #e2e8f0;
     --ev-border-subtle: #f1f5f9;
-    --ev-text-main: #0f172a;
-    --ev-text-muted: #64748b;
+    --ev-border-focus: #10b981;
+
+    --ev-text-main: #0f172a;        /* Deep Slate */
+    --ev-text-muted: #64748b;       /* Cool Slate */
+    --ev-text-subtle: #94a3b8;
+
+    /* Gradients */
+    --ev-gradient-primary: linear-gradient(135deg, #059669 0%, #0284c7 100%);
+    --ev-gradient-accent: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+    --ev-gradient-hero: linear-gradient(135deg, #090e17 0%, #0f172a 45%, #132238 100%);
+    --ev-gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 1) 100%);
+    --ev-gradient-glow: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+
+    /* Radii */
+    --ev-radius-xs: 6px;
     --ev-radius-sm: 8px;
     --ev-radius-md: 12px;
     --ev-radius-lg: 16px;
-    --ev-radius-xl: 20px;
-    --ev-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --ev-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
-    --ev-shadow-hover: 0 12px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+    --ev-radius-xl: 24px;
+    --ev-radius-pill: 50rem;
+
+    /* Multi-layered Soft Shadows */
+    --ev-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --ev-shadow-sm: 0 2px 4px 0 rgba(15, 23, 42, 0.04);
+    --ev-shadow-card: 0 4px 12px -2px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+    --ev-shadow-hover: 0 16px 32px -4px rgba(15, 23, 42, 0.10), 0 6px 12px -2px rgba(2, 132, 199, 0.06);
+    --ev-shadow-glow: 0 0 20px rgba(16, 185, 129, 0.25);
+
+    /* Animation Timing */
+    --ev-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --ev-transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --ev-transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Navbar */
+    --ev-nav-bg: rgba(15, 23, 42, 0.95);
+    --ev-nav-border: rgba(255, 255, 255, 0.08);
 }
 
+/* ============================================================================
+   DARK THEME OVERRIDES
+   ============================================================================ */
+[data-bs-theme="dark"], [data-theme="dark"] {
+    --ev-bg-main: #0b1120;           /* Midnight Obsidian */
+    --ev-bg-surface: #131c2e;        /* Dark Surface Panel */
+    --ev-bg-surface-elevated: #1e293b;
+    --ev-bg-subtle: #1e293b;
+    --ev-bg-card-hover: #182338;
+
+    --ev-border: rgba(255, 255, 255, 0.10);
+    --ev-border-subtle: rgba(255, 255, 255, 0.05);
+    --ev-border-focus: #34d399;
+
+    --ev-text-main: #f8fafc;
+    --ev-text-muted: #94a3b8;
+    --ev-text-subtle: #64748b;
+
+    --ev-shadow-card: 0 4px 16px -2px rgba(0, 0, 0, 0.35);
+    --ev-shadow-hover: 0 16px 36px -4px rgba(0, 0, 0, 0.5), 0 0 24px rgba(2, 132, 199, 0.15);
+
+    --ev-nav-bg: rgba(11, 17, 32, 0.96);
+    --ev-nav-border: rgba(255, 255, 255, 0.10);
+}
+
+/* Base Body Application */
 * {
     box-sizing: border-box;
 }
 
 body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    background-color: var(--ev-body-bg);
+    background-color: var(--ev-bg-main);
     color: var(--ev-text-main);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.012em;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color var(--ev-transition-normal), color var(--ev-transition-normal);
 }
 
 .main-content {
     flex: 1;
 }
 
+code, kbd, samp, pre {
+    font-family: 'JetBrains Mono', monospace;
+}
+
 /* ============================================================================
-   NAVBAR & HEADER
+   2. KEYFRAME ANIMATIONS & MICRO-INTERACTIONS
+   ============================================================================ */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45);
+    }
+    70% {
+        box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+@keyframes pulseGlowBlue {
+    0% {
+        box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.45);
+    }
+    70% {
+        box-shadow: 0 0 0 12px rgba(2, 132, 199, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(2, 132, 199, 0);
+    }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes floatBadge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+@keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Utility Animation Classes */
+.animate-fade-in {
+    animation: fadeIn var(--ev-transition-normal) forwards;
+}
+
+.animate-fade-up {
+    animation: fadeUp var(--ev-transition-slow) forwards;
+}
+
+.animate-scale-in {
+    animation: scaleIn var(--ev-transition-normal) forwards;
+}
+
+.pulse-badge {
+    animation: pulseGlow 2.5s infinite;
+}
+
+/* ============================================================================
+   3. MODERN NAVBAR & BRAND HEADER
    ============================================================================ */
 .navbar-modern {
-    background: rgba(15, 23, 42, 0.94) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    transition: all 0.2s ease;
+    background: var(--ev-nav-bg) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--ev-nav-border);
+    transition: all var(--ev-transition-fast);
+    padding: 0.65rem 0;
+    z-index: 1030;
 }
 
 .navbar-brand {
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     font-size: 1.15rem;
 }
 
@@ -73,13 +235,19 @@ body {
     width: 38px;
     height: 38px;
     border-radius: 10px;
-    background: linear-gradient(135deg, #10b981 0%, #0284c7 100%);
+    background: var(--ev-gradient-primary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: #ffffff;
     font-size: 1.25rem;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    transition: transform var(--ev-transition-fast), box-shadow var(--ev-transition-fast);
+}
+
+.navbar-brand:hover .brand-logo-icon {
+    transform: rotate(6deg) scale(1.05);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
 }
 
 .brand-badge {
@@ -87,195 +255,251 @@ body {
     color: #34d399;
     border: 1px solid rgba(52, 211, 153, 0.3);
     padding: 3px 8px;
-    border-radius: 6px;
+    border-radius: var(--ev-radius-xs);
     font-size: 0.7rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    margin-left: 10px;
+    margin-left: 8px;
 }
 
 .nav-link {
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     color: #94a3b8 !important;
     padding: 0.5rem 0.85rem !important;
-    border-radius: 8px;
-    transition: all 0.15s ease;
+    border-radius: var(--ev-radius-sm);
+    transition: all var(--ev-transition-fast);
+    position: relative;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover {
     color: #ffffff !important;
     background: rgba(255, 255, 255, 0.08);
 }
 
+.nav-link.active {
+    color: #ffffff !important;
+    background: rgba(16, 185, 129, 0.18);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Theme Toggle Pill Button */
+.btn-theme-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e2e8f0;
+    transition: all var(--ev-transition-fast);
+    cursor: pointer;
+}
+
+.btn-theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #38bdf8;
+    transform: rotate(20deg) scale(1.06);
+}
+
 /* ============================================================================
-   STAT CARDS & PANELS
+   4. STAT CARDS, PANELS & GLASS CONTAINERS
    ============================================================================ */
 .stat-card {
     border: 1px solid var(--ev-border);
     border-radius: var(--ev-radius-lg);
-    background: var(--ev-card-bg);
+    background: var(--ev-bg-surface);
     box-shadow: var(--ev-shadow-card);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    transition: transform var(--ev-transition-normal), box-shadow var(--ev-transition-normal), border-color var(--ev-transition-normal), background-color var(--ev-transition-normal);
     overflow: hidden;
     position: relative;
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
     box-shadow: var(--ev-shadow-hover);
-    border-color: #cbd5e1;
+    border-color: #38bdf8;
+}
+
+[data-bs-theme="dark"] .stat-card:hover, [data-theme="dark"] .stat-card:hover {
+    border-color: rgba(56, 189, 248, 0.4);
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--ev-gradient-primary);
+    opacity: 0;
+    transition: opacity var(--ev-transition-fast);
+}
+
+.stat-card:hover::after {
+    opacity: 1;
 }
 
 .stat-icon {
-    width: 46px;
-    height: 46px;
+    width: 48px;
+    height: 48px;
     border-radius: var(--ev-radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.35rem;
+    font-size: 1.4rem;
     flex-shrink: 0;
+    transition: transform var(--ev-transition-fast);
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(4deg);
 }
 
 .glass-panel {
     background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--ev-border);
     border-radius: var(--ev-radius-lg);
     box-shadow: var(--ev-shadow-card);
 }
 
-.hero-banner {
-    background: linear-gradient(135deg, #090e17 0%, #0f172a 45%, #132238 100%);
-    position: relative;
-    overflow: hidden;
-}
-
-.hero-banner::before {
-    content: '';
-    position: absolute;
-    width: 600px;
-    height: 600px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
-    top: -200px;
-    right: -100px;
-    pointer-events: none;
-}
-
-.hero-banner::after {
-    content: '';
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(2, 132, 199, 0.10) 0%, transparent 70%);
-    bottom: -150px;
-    left: 10%;
-    pointer-events: none;
+[data-bs-theme="dark"] .glass-panel, [data-theme="dark"] .glass-panel {
+    background: rgba(19, 28, 46, 0.85);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* ============================================================================
-   BUTTONS & CONTROLS
+   5. BUTTONS, HOVER & PRESSED INTERACTIONS
    ============================================================================ */
 .btn {
     font-weight: 600;
     border-radius: var(--ev-radius-md);
-    padding: 0.5rem 1rem;
-    transition: all 0.15s ease;
+    padding: 0.55rem 1.15rem;
     font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: all var(--ev-transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--ev-border-focus);
+    outline-offset: 2px;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    background: var(--ev-gradient-primary);
     border: none;
-    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35);
     color: #ffffff;
 }
 
-.btn-primary:hover {
-    background: linear-gradient(135deg, #047857 0%, #065f46 100%);
-    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
-    transform: translateY(-1px);
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #047857 0%, #0369a1 100%);
+    box-shadow: 0 6px 18px rgba(5, 150, 105, 0.45);
+    transform: translateY(-2px);
+    color: #ffffff;
+}
+
+.btn-accent {
+    background: var(--ev-gradient-accent);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+}
+
+.btn-accent:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0369a1 0%, #0891b2 100%);
+    box-shadow: 0 6px 18px rgba(2, 132, 199, 0.45);
+    transform: translateY(-2px);
     color: #ffffff;
 }
 
 .btn-outline-primary {
     color: var(--ev-primary);
-    border-color: #a7f3d0;
+    border: 1px solid #10b981;
+    background: transparent;
 }
 
-.btn-outline-primary:hover {
-    background-color: var(--ev-primary);
+.btn-outline-primary:hover:not(:disabled) {
+    background: var(--ev-primary);
     border-color: var(--ev-primary);
     color: #ffffff;
-}
-
-.btn-accent {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-    color: #ffffff;
-    border: none;
-    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
-}
-
-.btn-accent:hover {
-    background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
-    color: #ffffff;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-pill {
-    border-radius: 50rem;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+    border-radius: var(--ev-radius-pill);
+    padding-left: 1.4rem;
+    padding-right: 1.4rem;
+}
+
+/* Button Loading State */
+.btn-loading {
+    pointer-events: none;
+    opacity: 0.85;
 }
 
 /* ============================================================================
-   INPUTS & FORMS
+   6. INPUTS & FORM CONTROLS
    ============================================================================ */
 .form-control, .form-select {
     border: 1px solid var(--ev-border);
     border-radius: var(--ev-radius-md);
-    padding: 0.55rem 0.85rem;
-    font-size: 0.875rem;
+    padding: 0.6rem 0.95rem;
+    font-size: 0.88rem;
     color: var(--ev-text-main);
-    background-color: #ffffff;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    background-color: var(--ev-bg-surface);
+    transition: border-color var(--ev-transition-fast), box-shadow var(--ev-transition-fast), background-color var(--ev-transition-fast);
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    border-color: var(--ev-border-focus);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+    background-color: var(--ev-bg-surface);
+    color: var(--ev-text-main);
     outline: none;
-}
-
-.form-label {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: #334155;
-    margin-bottom: 0.35rem;
 }
 
 .input-group-text {
     border-color: var(--ev-border);
-    background-color: #f8fafc;
-    color: #64748b;
+    background-color: var(--ev-bg-subtle);
+    color: var(--ev-text-muted);
     border-radius: var(--ev-radius-md);
 }
 
+.form-label {
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: var(--ev-text-main);
+    margin-bottom: 0.4rem;
+}
+
 /* ============================================================================
-   STATUS BADGES
+   7. STATUS BADGES & INDICATORS
    ============================================================================ */
 .badge-status {
-    padding: 4px 10px;
-    border-radius: 50rem;
-    font-size: 0.725rem;
+    padding: 5px 12px;
+    border-radius: var(--ev-radius-pill);
+    font-size: 0.75rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
+    letter-spacing: 0.02em;
 }
 
 .badge-available {
@@ -297,42 +521,118 @@ body {
 }
 
 .badge-out-of-service {
-    background-color: #f1f5f9;
-    color: #475569;
-    border: 1px solid #cbd5e1;
-}
-
-.badge-company {
-    background-color: #f1f5f9;
-    color: #1e293b;
-    border: 1px solid #e2e8f0;
-    font-weight: 600;
+    background-color: var(--ev-bg-subtle);
+    color: var(--ev-text-muted);
+    border: 1px solid var(--ev-border);
 }
 
 .badge-tech-pill {
     background: rgba(255, 255, 255, 0.08);
     color: #e2e8f0;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    font-size: 0.75rem;
-    padding: 4px 10px;
-    border-radius: 50rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 0.78rem;
+    padding: 5px 12px;
+    border-radius: var(--ev-radius-pill);
+    backdrop-filter: blur(8px);
 }
 
 /* ============================================================================
-   MAP & LEAFLET CUSTOM STYLES
+   8. TABLES & LISTS
+   ============================================================================ */
+.table-modern {
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-modern thead th {
+    background-color: var(--ev-bg-subtle);
+    color: var(--ev-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--ev-border);
+    padding: 0.85rem 1.15rem;
+}
+
+.table-modern tbody td {
+    padding: 0.95rem 1.15rem;
+    vertical-align: middle;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--ev-border-subtle);
+    color: var(--ev-text-main);
+    transition: background-color var(--ev-transition-fast);
+}
+
+.table-modern tbody tr:hover td {
+    background-color: rgba(2, 132, 199, 0.04);
+}
+
+[data-bs-theme="dark"] .table-modern tbody tr:hover td,
+[data-theme="dark"] .table-modern tbody tr:hover td {
+    background-color: rgba(56, 189, 248, 0.08);
+}
+
+/* ============================================================================
+   9. HERO BANNER & LANDING GRAPHICS
+   ============================================================================ */
+.hero-banner {
+    background: var(--ev-gradient-hero);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-banner::before {
+    content: '';
+    position: absolute;
+    width: 650px;
+    height: 650px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.16) 0%, transparent 70%);
+    top: -220px;
+    right: -100px;
+    pointer-events: none;
+    animation: floatBadge 8s infinite ease-in-out;
+}
+
+.hero-banner::after {
+    content: '';
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(2, 132, 199, 0.14) 0%, transparent 70%);
+    bottom: -180px;
+    left: 5%;
+    pointer-events: none;
+    animation: floatBadge 10s infinite ease-in-out reverse;
+}
+
+/* Animated Number Counter Styling */
+.counter-value {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+/* ============================================================================
+   10. MAP & LEAFLET CUSTOM STYLES
    ============================================================================ */
 #map {
-    height: 560px;
+    height: 580px;
     width: 100%;
     border-radius: var(--ev-radius-lg);
     z-index: 1;
+    box-shadow: var(--ev-shadow-card);
 }
 
 .leaflet-popup-content-wrapper {
     border-radius: var(--ev-radius-lg);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 16px 32px -4px rgba(0, 0, 0, 0.2);
     padding: 4px;
     border: 1px solid var(--ev-border);
+    background: var(--ev-bg-surface);
+    color: var(--ev-text-main);
 }
 
 .leaflet-popup-content {
@@ -340,29 +640,15 @@ body {
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Custom Marker Pins */
-.custom-station-pin {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-    border: 2px solid #ffffff;
-}
-
-.pin-available {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-}
-
-.pin-busy {
-    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+/* Active Highlight for Stations Selected in Map */
+.station-card-highlighted {
+    border-color: #0284c7 !important;
+    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.35), var(--ev-shadow-hover) !important;
+    background-color: rgba(2, 132, 199, 0.03) !important;
 }
 
 /* ============================================================================
-   BATTERY VISUALIZER (CHARGING SESSION)
+   11. BATTERY VISUALIZER (CHARGING SESSION)
    ============================================================================ */
 .battery-container {
     width: 180px;
@@ -373,7 +659,7 @@ body {
     padding: 6px;
     background: #090e17;
     margin: 0 auto;
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
 .battery-container::before {
@@ -390,7 +676,7 @@ body {
 
 .battery-fill {
     width: 100%;
-    background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(180deg, #34d399 0%, #059669 100%);
     border-radius: 16px;
     position: absolute;
     bottom: 6px;
@@ -410,12 +696,7 @@ body {
     font-weight: 800;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
     z-index: 2;
-}
-
-@keyframes pulseGlow {
-    0% { box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
-    50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.85); }
-    100% { box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+    font-family: 'JetBrains Mono', monospace;
 }
 
 .charging-active {
@@ -423,85 +704,56 @@ body {
 }
 
 /* ============================================================================
-   TABLES & LISTS
-   ============================================================================ */
-.table-modern {
-    margin-bottom: 0;
-}
-
-.table-modern thead th {
-    background-color: #f8fafc;
-    color: #475569;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--ev-border);
-    padding: 0.75rem 1rem;
-}
-
-.table-modern tbody td {
-    padding: 0.85rem 1rem;
-    vertical-align: middle;
-    font-size: 0.875rem;
-    border-bottom: 1px solid var(--ev-border-subtle);
-}
-
-.table-modern tbody tr:hover td {
-    background-color: #f8fafc;
-}
-
-/* ============================================================================
-   HOW IT WORKS PROCESS STEPPER
+   12. PROCESS STEP CARDS (HOW IT WORKS)
    ============================================================================ */
 .process-step-card {
     border: 1px solid var(--ev-border);
-    background: #ffffff;
+    background: var(--ev-bg-surface);
     border-radius: var(--ev-radius-lg);
-    padding: 1.5rem;
+    padding: 1.6rem;
     text-align: center;
     position: relative;
     height: 100%;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform var(--ev-transition-normal), box-shadow var(--ev-transition-normal), border-color var(--ev-transition-normal);
 }
 
 .process-step-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px);
     box-shadow: var(--ev-shadow-hover);
-    border-color: #a7f3d0;
+    border-color: #34d399;
 }
 
 .process-step-badge {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #059669 0%, #0284c7 100%);
+    background: var(--ev-gradient-primary);
     color: #ffffff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
+    font-weight: 800;
+    font-size: 1.2rem;
+    margin-bottom: 1.1rem;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
 }
 
 /* ============================================================================
-   FOOTER
+   13. FOOTER
    ============================================================================ */
 footer.modern-footer {
     background: #090e17;
     color: #94a3b8;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 40px 0 24px;
+    padding: 48px 0 28px;
     margin-top: auto;
-    font-size: 0.875rem;
+    font-size: 0.88rem;
 }
 
 footer.modern-footer a {
     color: #cbd5e1;
     text-decoration: none;
-    transition: color 0.15s ease;
+    transition: color var(--ev-transition-fast);
 }
 
 footer.modern-footer a:hover {
@@ -509,16 +761,66 @@ footer.modern-footer a:hover {
 }
 
 /* ============================================================================
-   RESPONSIVENESS UTILITIES
+   14. FLOATING TOAST NOTIFICATIONS
+   ============================================================================ */
+.toast-container-custom {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 1090;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast-custom {
+    pointer-events: auto;
+    min-width: 320px;
+    max-width: 420px;
+    border-radius: var(--ev-radius-md);
+    background: var(--ev-bg-surface);
+    color: var(--ev-text-main);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+    border: 1px solid var(--ev-border);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: fadeUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.3s ease;
+}
+
+/* ============================================================================
+   15. ACCESSIBILITY & PREFERS-REDUCED-MOTION
+   ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .hero-banner::before, .hero-banner::after, .pulse-badge, .charging-active {
+        animation: none !important;
+    }
+}
+
+/* ============================================================================
+   16. MOBILE & TABLET RESPONSIVENESS
    ============================================================================ */
 @media (max-width: 768px) {
     #map {
-        height: 380px;
+        height: 400px;
     }
     .stat-card {
-        padding: 1rem !important;
+        padding: 1.1rem !important;
     }
     .navbar-brand {
-        font-size: 1rem;
+        font-size: 1.05rem;
+    }
+    .hero-banner {
+        padding-top: 2.5rem !important;
+        padding-bottom: 2.5rem !important;
     }
 }

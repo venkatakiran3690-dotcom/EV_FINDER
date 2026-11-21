@@ -21,9 +21,12 @@
                 </div>
                 <span class="badge bg-warning text-dark ms-2">Station Manager</span>
             </a>
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
                 <span class="navbar-text text-light small" id="mgrTitle"><i class="bi bi-person-badge text-warning me-1"></i> Hub Manager</span>
                 <button class="btn btn-outline-danger btn-sm" onclick="auth.logout()"><i class="bi bi-box-arrow-right me-1"></i> Logout</button>
+                <button class="btn btn-outline-light btn-sm btn-theme-toggle" id="themeToggleBtn" onclick="theme.toggle()" title="Toggle Dark/Light Theme" aria-label="Toggle Dark/Light Theme">
+                    <i class="bi bi-moon-stars-fill"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -211,6 +214,7 @@
         let assignedStationsData = [];
 
         async function initManagerHub() {
+            theme.init();
             const user = auth.getUser();
             if (user) {
                 document.getElementById('mgrTitle').innerHTML = `<i class="bi bi-person-badge text-warning me-1"></i> ${user.fullName} (${user.role})`;
@@ -221,7 +225,7 @@
                 assignedStationsData = await apiFetch('/stations/manager/assigned');
                 const container = document.getElementById('chargersListContainer');
 
-                document.getElementById('mgrStatStations').innerText = assignedStationsData.length;
+                animateCounter('mgrStatStations', assignedStationsData.length, 1000);
 
                 // Populate station dropdown for maintenance modal
                 const stationSelect = document.getElementById('mStationSelect');
@@ -233,7 +237,7 @@
                 assignedStationsData.forEach(s => {
                     if (s.chargers) totalChargersCount += s.chargers.length;
                 });
-                document.getElementById('mgrStatChargers').innerText = totalChargersCount;
+                animateCounter('mgrStatChargers', totalChargersCount, 1200);
 
                 if (assignedStationsData.length === 0) {
                     container.innerHTML = `
@@ -314,7 +318,7 @@
             const resContainer = document.getElementById('reservationsContainer');
             try {
                 const bookings = await apiFetch('/bookings');
-                document.getElementById('mgrStatBookings').innerText = bookings.length;
+                animateCounter('mgrStatBookings', bookings ? bookings.length : 0, 1000);
                 if (!bookings || bookings.length === 0) {
                     resContainer.innerHTML = `<div class="text-muted small text-center py-3">No active reservations today.</div>`;
                     return;

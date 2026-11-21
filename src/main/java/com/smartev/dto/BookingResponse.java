@@ -79,6 +79,9 @@ public class BookingResponse {
     public BigDecimal getTokenAmount() { return tokenAmount; }
     public void setTokenAmount(BigDecimal tokenAmount) { this.tokenAmount = tokenAmount; }
 
+    public BigDecimal getBookingFee() { return tokenAmount; }
+    public void setBookingFee(BigDecimal bookingFee) { this.tokenAmount = bookingFee; }
+
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 

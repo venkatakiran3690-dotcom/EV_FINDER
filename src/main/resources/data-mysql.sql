@@ -20,14 +20,20 @@ INSERT INTO users (id, email, password_hash, full_name, phone, role, company_id,
 (3, 'zeon@smartev.com', '$2a$10$retgfgTehY/NWtR/jnMV6O7OlTXHnezYUEYiX8svvSVMQIOv6ChvO', 'Priya Natarajan (Zeon CPO Admin)', '+91 98765 00003', 'COMPANY_ADMIN', 2, 'ACTIVE'),
 (4, 'manager.bangalore@smartev.com', '$2a$10$El37MjYvknbRgcXOnysDKO73ZtbL5lnsO4tedWtC5JdhqVz/a.ru6', 'Suresh Kumar (Hub Manager)', '+91 98765 00004', 'STATION_MANAGER', 1, 'ACTIVE'),
 (5, 'driver@smartev.com', '$2a$10$hQ3abG0tvyE.Bow4srWzM.MwaWPT4QJve8Fg7ROVMKt1yy59y932K', 'Venkata Kiran', '+91 98765 43210', 'DRIVER', NULL, 'ACTIVE'),
-(6, 'driver2@smartev.com', '$2a$10$hQ3abG0tvyE.Bow4srWzM.MwaWPT4QJve8Fg7ROVMKt1yy59y932K', 'Ananya Reddy', '+91 98765 43211', 'DRIVER', NULL, 'ACTIVE')
+(6, 'driver2@smartev.com', '$2a$10$hQ3abG0tvyE.Bow4srWzM.MwaWPT4QJve8Fg7ROVMKt1yy59y932K', 'Ananya Reddy', '+91 98765 43211', 'DRIVER', NULL, 'ACTIVE'),
+(7, 'driver3@smartev.com', '$2a$10$hQ3abG0tvyE.Bow4srWzM.MwaWPT4QJve8Fg7ROVMKt1yy59y932K', 'Rahul Sharma', '+91 98765 43212', 'DRIVER', NULL, 'ACTIVE'),
+(8, 'driver4@smartev.com', '$2a$10$hQ3abG0tvyE.Bow4srWzM.MwaWPT4QJve8Fg7ROVMKt1yy59y932K', 'Kavya Raman', '+91 98765 43213', 'DRIVER', NULL, 'ACTIVE'),
+(9, 'driver5@smartev.com', '$2a$10$hQ3abG0tvyE.Bow4srWzM.MwaWPT4QJve8Fg7ROVMKt1yy59y932K', 'Siddharth Verma', '+91 98765 43214', 'DRIVER', NULL, 'ACTIVE')
 ON DUPLICATE KEY UPDATE email=VALUES(email), password_hash=VALUES(password_hash);
 
 -- 3. VEHICLES
 INSERT INTO vehicles (id, driver_id, make, model, model_year, license_plate, battery_capacity_kwh, compatible_connector) VALUES
 (1, 5, 'Tata', 'Nexon EV Long Range', 2024, 'KA-01-EV-4096', 40.5, 'CCS2'),
 (2, 5, 'MG', 'ZS EV Excite', 2023, 'KA-05-EV-8821', 50.3, 'CCS2'),
-(3, 6, 'Hyundai', 'Ioniq 5 EV', 2024, 'TS-09-EV-1008', 72.6, 'CCS2')
+(3, 6, 'Hyundai', 'Ioniq 5 EV', 2024, 'TS-09-EV-1008', 72.6, 'CCS2'),
+(4, 7, 'Tata', 'Tiago EV Long Range', 2024, 'TS-07-EV-2045', 24.0, 'CCS2'),
+(5, 8, 'Mahindra', 'XUV400 EV', 2023, 'TN-02-EV-5544', 39.4, 'CCS2'),
+(6, 9, 'BYD', 'Atto 3 Superior', 2024, 'AP-16-EV-9021', 60.48, 'CCS2')
 ON DUPLICATE KEY UPDATE license_plate=VALUES(license_plate);
 
 -- 4. STATIONS
@@ -250,3 +256,49 @@ INSERT INTO activity_logs (id, user_id, user_email, user_role, action, details, 
 (2, 5, 'driver@smartev.com', 'DRIVER', 'Driver Account Onboarded', 'Registered verified driver profile with vehicle KA-01-EV-4096.', '127.0.0.1', '2026-11-07 10:05:00'),
 (3, 4, 'manager.bangalore@smartev.com', 'STATION_MANAGER', 'Hub Station Assignment Initialized', 'Assigned operational management for Tata Power EV Hub - Indiranagar.', '127.0.0.1', '2026-11-07 10:10:00')
 ON DUPLICATE KEY UPDATE action=VALUES(action);
+
+-- 9. DEMO BOOKINGS
+INSERT INTO bookings (id, booking_code, driver_id, vehicle_id, station_id, charger_id, start_time, end_time, distance_at_booking_km, booking_fee, status, created_at) VALUES
+(1, 'BK-DEMO-001', 5, 1, 1, 1, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_ADD(DATE_SUB(NOW(), INTERVAL 1 DAY), INTERVAL 45 MINUTE), 4.2, 150.00, 'COMPLETED', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(2, 'BK-DEMO-002', 6, 3, 6, 18, DATE_ADD(NOW(), INTERVAL 1 DAY), DATE_ADD(DATE_ADD(NOW(), INTERVAL 1 DAY), INTERVAL 45 MINUTE), 5.4, 150.00, 'CONFIRMED', NOW()),
+(3, 'BK-DEMO-003', 8, 5, 12, 38, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_ADD(DATE_SUB(NOW(), INTERVAL 1 DAY), INTERVAL 40 MINUTE), 6.8, 150.00, 'COMPLETED', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(4, 'BK-DEMO-004', 9, 6, 17, 57, DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_ADD(DATE_SUB(NOW(), INTERVAL 2 DAY), INTERVAL 50 MINUTE), 7.5, 150.00, 'COMPLETED', DATE_SUB(NOW(), INTERVAL 2 DAY))
+ON DUPLICATE KEY UPDATE booking_code=VALUES(booking_code), status=VALUES(status);
+
+-- 10. DEMO PAYMENTS
+INSERT INTO payments (id, booking_id, driver_id, transaction_reference, amount, payment_method, status, gateway_response, created_at) VALUES
+(1, 1, 5, 'TXN-DEMO-INIT001', 150.00, 'DEMO_TOKEN', 'SUCCESS', 'Demo Token Wallet', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(2, 2, 6, 'TXN-DEMO-INIT002', 150.00, 'DEMO_TOKEN', 'SUCCESS', 'Demo Token Wallet', NOW()),
+(3, 3, 8, 'TXN-DEMO-INIT003', 150.00, 'DEMO_TOKEN', 'SUCCESS', 'Demo Token Wallet', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(4, 4, 9, 'TXN-DEMO-INIT004', 150.00, 'DEMO_TOKEN', 'SUCCESS', 'Demo Token Wallet', DATE_SUB(NOW(), INTERVAL 2 DAY))
+ON DUPLICATE KEY UPDATE transaction_reference=VALUES(transaction_reference);
+
+-- 11. CHARGING SESSIONS
+INSERT INTO charging_sessions (id, booking_id, charger_id, driver_id, session_code, start_time, end_time, initial_battery_pct, current_battery_pct, energy_consumed_kwh, status, created_at) VALUES
+(1, 1, 1, 5, 'SESS-DEMO-001', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_ADD(DATE_SUB(NOW(), INTERVAL 1 DAY), INTERVAL 45 MINUTE), 22, 82, 24.50, 'COMPLETED', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(2, 3, 38, 8, 'SESS-DEMO-002', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_ADD(DATE_SUB(NOW(), INTERVAL 1 DAY), INTERVAL 40 MINUTE), 25, 85, 32.40, 'COMPLETED', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(3, 4, 57, 9, 'SESS-DEMO-003', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_ADD(DATE_SUB(NOW(), INTERVAL 2 DAY), INTERVAL 50 MINUTE), 30, 88, 28.00, 'COMPLETED', DATE_SUB(NOW(), INTERVAL 2 DAY))
+ON DUPLICATE KEY UPDATE session_code=VALUES(session_code);
+
+-- 12. BILLS
+INSERT INTO bills (id, invoice_number, session_id, booking_id, driver_id, company_id, station_id, charger_id, energy_consumed_kwh, price_per_kwh, energy_cost, service_charge, tax_percentage, tax_amount, total_amount, payment_status, created_at) VALUES
+(1, 'INV-2026-0001', 1, 1, 5, 1, 1, 1, 24.50, 19.50, 477.75, 25.00, 18.00, 90.50, 593.25, 'PAID', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(2, 'INV-2026-0002', 3, 4, 9, 3, 17, 57, 28.00, 18.50, 518.00, 20.00, 18.00, 96.84, 634.84, 'PAID', DATE_SUB(NOW(), INTERVAL 2 DAY))
+ON DUPLICATE KEY UPDATE invoice_number=VALUES(invoice_number);
+
+-- 13. REVIEWS & RATINGS (8 BASE + 5 USER FEEDBACK)
+INSERT INTO reviews (id, station_id, driver_id, rating, comment, created_at) VALUES
+(1, 1, 5, 5, 'Excellent high-speed 60 kW charging post! Charged my Nexon from 20% to 80% in 45 minutes.', DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(2, 1, 6, 4, 'Clean station, easy access near Indiranagar 100ft road.', DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(3, 2, 5, 5, 'Ultra-fast 120 kW charger at Electronic City. Very helpful on the commute.', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(4, 6, 6, 5, 'Cyber Towers hub is spotless! 120 kW fast gun reached full rate instantly on Ioniq 5.', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(5, 12, 5, 5, 'Reliable charging on OMR expressway near Sholinganallur. Great amenities nearby.', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(6, 17, 5, 5, 'NH 16 airport corridor stop has fantastic high-speed chargers and clean washrooms.', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(7, 20, 6, 4, 'Convenient VIP road location in Vizag. Easy pre-booking through the geofenced app.', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(8, 23, 5, 5, 'Lifesaver on the Hyderabad-Bangalore NH 44 highway run. 120 kW DC charged smoothly.', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(9, 6, 5, 5, 'Excellent high-speed charging experience at Cyber Towers! The 120 kW charger delivered full capacity and the booking process was completely seamless. [Simulated Demo Review]', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(10, 12, 6, 4, 'Reliable 150 kW DC charging post along OMR Sholinganallur. Pre-booking saved me time during peak office commute. [Simulated Demo Review]', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(11, 17, 7, 5, 'Fantastic highway charging hub near Gannavaram Airport! Spotless amenities, rapid 120 kW charging, and easy payment. [Simulated Demo Review]', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(12, 1, 8, 4, 'Very convenient Indiranagar location with 60 kW DC charger. Geofenced slot reservation worked perfectly within 30 km. [Simulated Demo Review]', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(13, 7, 9, 3, 'Good charging speed at WaveRock Gachibowli, but the waiting bay can get crowded during peak evening hours. [Simulated Demo Review]', DATE_SUB(NOW(), INTERVAL 1 DAY))
+ON DUPLICATE KEY UPDATE rating=VALUES(rating), comment=VALUES(comment);

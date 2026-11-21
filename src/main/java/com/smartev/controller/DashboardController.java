@@ -26,7 +26,7 @@ public class DashboardController {
     }
 
     @GetMapping("/driver")
-    @PreAuthorize("hasRole('DRIVER')")
+    @PreAuthorize("hasAnyRole('DRIVER', 'PLATFORM_ADMIN')")
     public ResponseEntity<DashboardStatsResponse> getDriverDashboard(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         User driver = userRepository.findById(userPrincipal.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
