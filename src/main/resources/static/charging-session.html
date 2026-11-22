@@ -44,14 +44,40 @@
                     <div class="row g-4 align-items-center">
                         <!-- Left Column: Animated Battery Graphic -->
                         <div class="col-md-5 text-center">
-                            <div class="battery-container charging-active">
+                            <div class="battery-container charging-active" id="batteryContainer">
                                 <div class="battery-fill" id="batteryFill" style="height: 20%;"></div>
                                 <div class="battery-text" id="batteryPctText">20%</div>
                             </div>
                             <div class="mt-3">
-                                <span class="badge bg-success px-3 py-2 fs-6"><i class="bi bi-lightning-charge-fill"></i> FAST CHARGING</span>
+                                <span class="badge bg-success px-3 py-2 fs-6" id="chargingStateBadge"><i class="bi bi-lightning-charge-fill"></i> FAST CHARGING</span>
                             </div>
                             <div class="small text-muted mt-2" id="initialBatteryLabel">Starting SoC: 20%</div>
+
+                            <!-- Real-Time Charging Time & Estimated Range Components -->
+                            <div class="row g-2 mt-3 text-start">
+                                <div class="col-6">
+                                    <div class="card bg-dark border-secondary p-2 text-center h-100">
+                                        <div class="text-muted" style="font-size: 0.72rem;">
+                                            <i class="bi bi-hourglass-split text-info me-1"></i>Est. Time Left
+                                        </div>
+                                        <div class="fw-bold text-info" id="estTimeRemaining" style="font-size: 1.05rem;">
+                                            -- min
+                                        </div>
+                                        <div class="text-white-50" id="estTimeSubtext" style="font-size: 0.65rem;">to 85% fast charge</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="card bg-dark border-secondary p-2 text-center h-100">
+                                        <div class="text-muted" style="font-size: 0.72rem;">
+                                            <i class="bi bi-speedometer2 text-success me-1"></i>Est. Range
+                                        </div>
+                                        <div class="fw-bold text-success" id="estDrivingRange" style="font-size: 1.05rem;">
+                                            -- km
+                                        </div>
+                                        <div class="text-white-50" id="estRangeSubtext" style="font-size: 0.65rem;">simulated estimate</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Right Column: Live Session Telemetry -->
@@ -123,6 +149,12 @@
         let pricePerKwh = 19.50;
         let currentBattery = 20;
 
+        // Vehicle specifications for real-time estimation
+        let vehicleBatteryCapacity = null;
+        let vehicleFullRangeKm = null;
+        let vehicleName = null;
+        let isSessionCompleted = false;
+
         async function initSession() {
             try {
                 // Check if active session exists
@@ -145,14 +177,29 @@
 
                 currentSession = session;
                 powerKw = session.powerRatingKw || 50.0;
-                currentBattery = session.initialBatteryPct || 22;
+                currentBattery = session.currentBatteryPct || session.initialBatteryPct || 22;
+
+                // Bind vehicle specifications
+                vehicleBatteryCapacity = session.batteryCapacityKwh || null;
+                vehicleFullRangeKm = session.estimatedFullRangeKm || null;
+                vehicleName = session.vehicleModel ? `${session.vehicleMake || ''} ${session.vehicleModel}`.trim() : null;
 
                 document.getElementById('sessionCodeBadge').innerText = session.sessionCode;
                 document.getElementById('bookingCodeBadge').innerText = 'Booking: ' + session.bookingCode;
                 document.getElementById('stationTitle').innerText = session.stationName;
-                document.getElementById('chargerTitle').innerText = `${session.chargerIdentifier} (${session.chargerType} - ${powerKw} kW)`;
+                const vehicleDisplay = vehicleName ? ` • ${vehicleName}` : '';
+                document.getElementById('chargerTitle').innerText = `${session.chargerIdentifier} (${session.chargerType} - ${powerKw} kW)${vehicleDisplay}`;
                 document.getElementById('powerKwLabel').innerText = `${powerKw} kW`;
                 document.getElementById('initialBatteryLabel').innerText = `Starting SoC: ${session.initialBatteryPct}%`;
+
+                // If session is already completed, show completed UI immediately
+                if (session.status === 'COMPLETED') {
+                    handleSessionCompletedState(currentBattery);
+                    return;
+                }
+
+                // Initial estimate calculation
+                updateEstimates(currentBattery);
 
                 // Start local ticker animation
                 simulationStartTime = Date.now() - (session.elapsedMinutes || 0) * 60000;
@@ -163,9 +210,80 @@
             }
         }
 
+        function updateEstimates(batteryPct) {
+            if (isSessionCompleted) return;
+
+            // FEATURE 1: ESTIMATED CHARGING TIME REMAINING
+            const timeEl = document.getElementById('estTimeRemaining');
+            if (!vehicleBatteryCapacity || vehicleBatteryCapacity <= 0 || !powerKw || powerKw <= 0) {
+                timeEl.innerText = 'Estimate unavailable';
+            } else {
+                const targetSoC = 85;
+                if (batteryPct >= targetSoC) {
+                    timeEl.innerText = '0 min';
+                } else {
+                    const deltaKwh = vehicleBatteryCapacity * ((targetSoC - batteryPct) / 100.0);
+                    const effectivePowerKw = powerKw * 0.92;
+                    const hours = deltaKwh / effectivePowerKw;
+                    const mins = Math.max(1, Math.round(hours * 60));
+                    if (mins >= 60) {
+                        const h = Math.floor(mins / 60);
+                        const m = mins % 60;
+                        timeEl.innerText = `${h}h ${m}m`;
+                    } else {
+                        timeEl.innerText = `${mins} min`;
+                    }
+                }
+            }
+
+            // FEATURE 2: REAL-TIME ESTIMATED DRIVING RANGE
+            const rangeEl = document.getElementById('estDrivingRange');
+            if (!vehicleFullRangeKm || vehicleFullRangeKm <= 0) {
+                rangeEl.innerText = 'Estimate unavailable';
+            } else {
+                const estRange = Math.round((vehicleFullRangeKm * batteryPct) / 100.0);
+                rangeEl.innerText = `${estRange} km`;
+            }
+        }
+
+        function handleSessionCompletedState(finalBattery) {
+            isSessionCompleted = true;
+            clearInterval(timerInterval);
+
+            // Update badge to Completed
+            const badge = document.getElementById('chargingStateBadge');
+            if (badge) {
+                badge.className = 'badge bg-primary px-3 py-2 fs-6';
+                badge.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> CHARGING COMPLETED';
+            }
+
+            // Stop animated pulse
+            const container = document.getElementById('batteryContainer');
+            if (container) container.classList.remove('charging-active');
+
+            // Set final battery percentage
+            document.getElementById('batteryPctText').innerText = `${finalBattery}%`;
+            document.getElementById('batteryFill').style.height = `${finalBattery}%`;
+
+            // Stop remaining-time update
+            document.getElementById('estTimeRemaining').innerText = '0 min';
+            document.getElementById('estTimeSubtext').innerText = 'charging completed';
+
+            // Display Final Estimated Driving Range
+            if (vehicleFullRangeKm && vehicleFullRangeKm > 0) {
+                const finalRange = Math.round((vehicleFullRangeKm * finalBattery) / 100.0);
+                document.getElementById('estDrivingRange').innerText = `${finalRange} km`;
+                document.getElementById('estRangeSubtext').innerText = 'final estimated range';
+            } else {
+                document.getElementById('estDrivingRange').innerText = 'Estimate unavailable';
+            }
+        }
+
         function startTicker() {
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
+                if (isSessionCompleted) return;
+
                 const elapsedSec = Math.floor((Date.now() - simulationStartTime) / 1000);
                 const mins = Math.floor(elapsedSec / 60);
                 const secs = elapsedSec % 60;
@@ -177,6 +295,9 @@
                 const simBattery = Math.min(88, currentBattery + Math.floor(elapsedSec / 4));
                 document.getElementById('batteryFill').style.height = `${simBattery}%`;
                 document.getElementById('batteryPctText').innerText = `${simBattery}%`;
+
+                // Update dynamic estimates continuously
+                updateEstimates(simBattery);
 
                 // Energy in kWh = Power(kW) * (hours) * 0.92
                 // We add a minimum baseline so evaluator sees realistic delivery immediately
@@ -195,18 +316,19 @@
             setButtonLoading(btn, 'Generating Tax Invoice...');
 
             try {
-                clearInterval(timerInterval);
-                const batteryVal = parseInt(document.getElementById('batteryPctText').innerText);
+                const batteryVal = parseInt(document.getElementById('batteryPctText').innerText) || 85;
+                handleSessionCompletedState(batteryVal);
 
                 await apiFetch(`/sessions/${currentSession.id}/complete`, {
                     method: 'POST',
                     body: JSON.stringify({ finalBatteryPct: batteryVal })
                 });
 
-                showAlert('Charging session completed! Bill and Tax Invoice generated.', 'success');
+                const finalRangeStr = vehicleFullRangeKm ? `Final Estimated Driving Range: ${Math.round(vehicleFullRangeKm * batteryVal / 100)} km` : '';
+                showAlert(`Charging Completed! Final SoC: ${batteryVal}%${finalRangeStr ? ' • ' + finalRangeStr : ''}. Redirecting to invoice...`, 'success');
                 setTimeout(() => {
                     window.location.href = '/billing.html';
-                }, 1200);
+                }, 1500);
 
             } catch (err) {
                 showAlert(err.message, 'danger');

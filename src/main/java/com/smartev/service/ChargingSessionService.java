@@ -276,6 +276,69 @@ public class ChargingSessionService {
         res.setCurrentBatteryPct(session.getCurrentBatteryPct());
         res.setStatus(session.getStatus());
 
+        // Vehicle details, estimated range, and charging time remaining
+        Vehicle vehicle = session.getBooking() != null ? session.getBooking().getVehicle() : null;
+        if (vehicle != null) {
+            res.setVehicleId(vehicle.getId());
+            res.setVehicleMake(vehicle.getMake());
+            res.setVehicleModel(vehicle.getModel());
+            res.setVehiclePlate(vehicle.getLicensePlate());
+            res.setBatteryCapacityKwh(vehicle.getBatteryCapacityKwh());
+
+            double fullRange = calculateVehicleFullRangeKm(vehicle);
+            res.setEstimatedFullRangeKm(fullRange);
+
+            int currentBattery = session.getCurrentBatteryPct() != null ? session.getCurrentBatteryPct() : session.getInitialBatteryPct();
+            if (fullRange > 0) {
+                double range = (fullRange * currentBattery) / 100.0;
+                res.setEstimatedDrivingRangeKm(BigDecimal.valueOf(range).setScale(1, RoundingMode.HALF_UP).doubleValue());
+            }
+
+            double powerKw = session.getCharger() != null && session.getCharger().getPowerRatingKw() != null
+                    ? session.getCharger().getPowerRatingKw() : 50.0;
+            int estMinutes = calculateEstimatedTimeRemainingMinutes(vehicle.getBatteryCapacityKwh(), currentBattery, 85, powerKw);
+            if (estMinutes >= 0) {
+                res.setEstimatedRemainingMinutes(estMinutes);
+            }
+        }
+
         return res;
+    }
+
+    public static double calculateVehicleFullRangeKm(Vehicle v) {
+        if (v == null) return 0.0;
+        String model = (v.getModel() != null ? v.getModel() : "").toLowerCase();
+
+        if (model.contains("nexon")) {
+            return 450.0;
+        } else if (model.contains("zs") || model.contains("mg")) {
+            return 460.0;
+        } else if (model.contains("ioniq")) {
+            return 630.0;
+        } else if (model.contains("tiago")) {
+            return 315.0;
+        } else if (model.contains("xuv400") || model.contains("xuv")) {
+            return 456.0;
+        } else if (model.contains("atto") || model.contains("byd")) {
+            return 521.0;
+        }
+
+        if (v.getBatteryCapacityKwh() != null && v.getBatteryCapacityKwh() > 0) {
+            return Math.round(v.getBatteryCapacityKwh() * 8.5 * 10.0) / 10.0;
+        }
+        return 0.0;
+    }
+
+    public static int calculateEstimatedTimeRemainingMinutes(Double batteryCapacityKwh, int currentBatteryPct, int targetBatteryPct, double powerKw) {
+        if (batteryCapacityKwh == null || batteryCapacityKwh <= 0 || powerKw <= 0) {
+            return -1;
+        }
+        if (currentBatteryPct >= targetBatteryPct) {
+            return 0;
+        }
+        double deltaKwh = batteryCapacityKwh * ((targetBatteryPct - currentBatteryPct) / 100.0);
+        double effectivePowerKw = powerKw * 0.92;
+        double hours = deltaKwh / effectivePowerKw;
+        return (int) Math.round(hours * 60.0);
     }
 }

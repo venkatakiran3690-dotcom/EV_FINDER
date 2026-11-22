@@ -23,6 +23,14 @@ public class SessionResponse {
     private Integer initialBatteryPct;
     private Integer currentBatteryPct;
     private String status;
+    private Long vehicleId;
+    private String vehicleModel;
+    private String vehicleMake;
+    private String vehiclePlate;
+    private Double batteryCapacityKwh;
+    private Double estimatedFullRangeKm;
+    private Integer estimatedRemainingMinutes;
+    private Double estimatedDrivingRangeKm;
 
     public SessionResponse() {}
 
@@ -83,4 +91,28 @@ public class SessionResponse {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public Long getVehicleId() { return vehicleId; }
+    public void setVehicleId(Long vehicleId) { this.vehicleId = vehicleId; }
+
+    public String getVehicleModel() { return vehicleModel; }
+    public void setVehicleModel(String vehicleModel) { this.vehicleModel = vehicleModel; }
+
+    public String getVehicleMake() { return vehicleMake; }
+    public void setVehicleMake(String vehicleMake) { this.vehicleMake = vehicleMake; }
+
+    public String getVehiclePlate() { return vehiclePlate; }
+    public void setVehiclePlate(String vehiclePlate) { this.vehiclePlate = vehiclePlate; }
+
+    public Double getBatteryCapacityKwh() { return batteryCapacityKwh; }
+    public void setBatteryCapacityKwh(Double batteryCapacityKwh) { this.batteryCapacityKwh = batteryCapacityKwh; }
+
+    public Double getEstimatedFullRangeKm() { return estimatedFullRangeKm; }
+    public void setEstimatedFullRangeKm(Double estimatedFullRangeKm) { this.estimatedFullRangeKm = estimatedFullRangeKm; }
+
+    public Integer getEstimatedRemainingMinutes() { return estimatedRemainingMinutes; }
+    public void setEstimatedRemainingMinutes(Integer estimatedRemainingMinutes) { this.estimatedRemainingMinutes = estimatedRemainingMinutes; }
+
+    public Double getEstimatedDrivingRangeKm() { return estimatedDrivingRangeKm; }
+    public void setEstimatedDrivingRangeKm(Double estimatedDrivingRangeKm) { this.estimatedDrivingRangeKm = estimatedDrivingRangeKm; }
 }
